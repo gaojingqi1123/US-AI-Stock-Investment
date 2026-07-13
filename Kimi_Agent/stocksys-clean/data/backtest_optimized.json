@@ -1,0 +1,68 @@
+{
+  "test_date": "2026-07-10",
+  "period": "2025-07-10 to 2026-07-09 (1 year)",
+  "stocks_tested": [
+    "NVDA",
+    "AMD",
+    "MRVL",
+    "MU"
+  ],
+  "spy_benchmark": 13.3,
+  "combinations_tested": 72,
+  "strategies": [
+    {
+      "name": "高收益策略",
+      "params": {
+        "signals": "STRONG_BUY+BUY",
+        "hold_days": 3,
+        "allocation": 25,
+        "max_positions": 2,
+        "min_score": 70
+      },
+      "return": 37.1,
+      "max_drawdown": -9.6,
+      "sharpe": 3.87,
+      "win_rate": 60,
+      "trades": 57
+    },
+    {
+      "name": "高夏普策略(推荐)",
+      "params": {
+        "signals": "STRONG_BUY only",
+        "hold_days": 10,
+        "allocation": 25,
+        "max_positions": 3,
+        "min_score": 70,
+        "profit_target": "20%"
+      },
+      "return": 35.5,
+      "max_drawdown": -5.6,
+      "sharpe": 6.29,
+      "win_rate": 56,
+      "trades": 40
+    },
+    {
+      "name": "均衡策略",
+      "params": {
+        "signals": "STRONG_BUY+BUY",
+        "hold_days": 3,
+        "allocation": 25,
+        "max_positions": 2,
+        "min_score": 70,
+        "profit_target": "15%"
+      },
+      "return": 34.1,
+      "max_drawdown": -8.9,
+      "sharpe": 3.84,
+      "win_rate": 59,
+      "trades": 60
+    }
+  ],
+  "key_findings": [
+    "止损完全无效(从未触发)，7天持有期本身就是最好的止损",
+    "20%止盈大幅提升夏普比率(从4.70→6.29)，同时降低回撤",
+    "STRONG_BUY only比包含BUY信号更稳健(夏普4.70 vs 3.87)",
+    "25%单仓分配最优，2-3只持仓最佳",
+    "所有策略均大幅跑赢SPY(+13.3%)"
+  ]
+}

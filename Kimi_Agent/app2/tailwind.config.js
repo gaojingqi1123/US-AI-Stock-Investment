@@ -1,0 +1,138 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: ["class"],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+        // Financial terminal custom colors
+        "bg-primary": "#030712",
+        "bg-card": "#0B0F19",
+        "bg-elevated": "#111827",
+        "bg-panel": "#0D1320",
+        "accent-primary": "#00D9C0",
+        "accent-dim": "rgba(0, 217, 192, 0.15)",
+        "accent-glow": "rgba(0, 217, 192, 0.4)",
+        "signal-bullish": "#00E676",
+        "signal-bullish-dim": "rgba(0, 230, 118, 0.15)",
+        "signal-bearish": "#FF1744",
+        "signal-bearish-dim": "rgba(255, 23, 68, 0.15)",
+        "signal-neutral": "#FBBF24",
+        "text-primary": "#F8FAFC",
+        "text-secondary": "#94A3B8",
+        "text-muted": "#64748B",
+        "text-dim": "#475569",
+        "account-aggressive": "#FF6B35",
+        "account-stable": "#00D9C0",
+        "account-defensive": "#6366F1",
+        "vix-calm": "#00E676",
+        "vix-elevated": "#FBBF24",
+        "vix-high": "#FF9800",
+        "vix-extreme": "#FF5722",
+        "vix-panic": "#FF1744",
+        "chart-bullish": "#00E676",
+        "chart-bearish": "#FF1744",
+        "chart-ma5": "#00D9C0",
+        "chart-ma20": "#F472B6",
+        "chart-ma60": "#FBBF24",
+        "chart-grid": "#1E293B",
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+        heading: ['Geist', 'Inter', 'system-ui', 'sans-serif'],
+      },
+      borderRadius: {
+        xl: "calc(var(--radius) + 4px)",
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+        xs: "calc(var(--radius) - 6px)",
+      },
+      boxShadow: {
+        xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        card: "0 4px 20px rgba(0, 0, 0, 0.3)",
+        "card-hover": "0 8px 30px rgba(0, 0, 0, 0.4)",
+        glow: "0 0 20px rgba(0, 217, 192, 0.4)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "caret-blink": {
+          "0%,70%,100%": { opacity: "1" },
+          "20%,50%": { opacity: "0" },
+        },
+        "pulse-signal": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.05)" },
+        },
+        "flash-green": {
+          "0%": { backgroundColor: "rgba(0, 230, 118, 0.2)" },
+          "100%": { backgroundColor: "transparent" },
+        },
+        "flash-red": {
+          "0%": { backgroundColor: "rgba(255, 23, 68, 0.2)" },
+          "100%": { backgroundColor: "transparent" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "caret-blink": "caret-blink 1.25s ease-out infinite",
+        "pulse-signal": "pulse-signal 2s ease-in-out infinite",
+        "flash-green": "flash-green 500ms ease-out",
+        "flash-red": "flash-red 500ms ease-out",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+}

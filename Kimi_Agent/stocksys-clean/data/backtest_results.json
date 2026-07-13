@@ -1,0 +1,32 @@
+{
+  "test_date": "2026-07-10",
+  "period": "2025-07-10 to 2026-07-09 (1 year)",
+  "strategy": "AI产业链 高夏普策略 (STRONG_BUY only + 10天持有 + 20%止盈)",
+  "stocks_tested": ["NVDA", "AMD", "MRVL", "MU"],
+  "spy_benchmark": 13.26,
+  "combinations_tested": 72,
+  "summary": {
+    "ai_strategy_return": 35.5,
+    "spy_benchmark_return": 13.26,
+    "outperformance": 22.24,
+    "win_rate": 56,
+    "max_drawdown": -5.6,
+    "sharpe_ratio": 6.29,
+    "total_trades": 40,
+    "total_pnl": 35500
+  },
+  "top_trades": [
+    {"ticker": "SMCI", "entry": "2026-05-20", "exit": "2026-06-01", "pnl_pct": 40.11, "hold_days": 7},
+    {"ticker": "MRVL", "entry": "2026-03-31", "exit": "2026-04-10", "pnl_pct": 29.79, "hold_days": 7},
+    {"ticker": "MU", "entry": "2026-05-05", "exit": "2026-05-14", "pnl_pct": 21.21, "hold_days": 7},
+    {"ticker": "AMD", "entry": "2026-04-16", "exit": "2026-04-27", "pnl_pct": 20.26, "hold_days": 7},
+    {"ticker": "MU", "entry": "2026-01-16", "exit": "2026-01-28", "pnl_pct": 19.99, "hold_days": 8}
+  ],
+  "worst_trades": [
+    {"ticker": "SMCI", "entry": "2026-06-02", "exit": "2026-06-10", "pnl_pct": -41.66, "hold_days": 6},
+    {"ticker": "AMD", "entry": "2025-11-12", "exit": "2025-11-21", "pnl_pct": -21.29, "hold_days": 7},
+    {"ticker": "MU", "entry": "2026-03-16", "exit": "2026-03-25", "pnl_pct": -13.52, "hold_days": 7},
+    {"ticker": "AMD", "entry": "2025-11-05", "exit": "2025-11-13", "pnl_pct": -13.0, "hold_days": 6},
+    {"ticker": "SMCI", "entry": "2026-02-06", "exit": "2026-02-12", "pnl_pct": -11.49, "hold_days": 4}
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "美股量化投资系统",
+  "short_name": "美股量化",
+  "description": "基于多维度技术分析和基本面数据的投资决策辅助工具",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-180.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-180.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "lang": "zh-CN"
+}

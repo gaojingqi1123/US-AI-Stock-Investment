@@ -1,0 +1,1141 @@
+
+var document = { 
+  getElementById: function(id) { return { innerHTML: '' }; },
+  addEventListener: function(){},
+  createElement: function(tag) { return {}; }
+};
+var window = { 
+  location: { hash: '' }, 
+  addEventListener: function(){}
+};
+var localStorage = { 
+  getItem: function(k){ return null; }, 
+  setItem: function(k,v){} 
+};
+var fetch = function(){ return Promise.resolve({ok:false}); };
+var setInterval = function(){ return 1; };
+var clearInterval = function(){};
+var console = { 
+  log: function(){ for(var i=0;i<arguments.length;i++) process.stdout.write(arguments[i]+' '); process.stdout.write('\n'); },
+  error: function(){ for(var i=0;i<arguments.length;i++) process.stdout.write('ERR:'+arguments[i]+' '); process.stdout.write('\n'); }
+};
+var navigator = {};
+var alert = function(msg){ console.log('ALERT:', msg); };
+
+
+const STOCKS = {
+  AAPL: {name: "Apple", price: 310.66, prev: 310.66, change: 0.0, pct: 0.0, high52: 317.40, low52: 201.50, pe: 37.7, cap: "4.56T", vol: "42.1M", avgVol: "54.2M", ma5: 312.0, ma20: 298.5, ma60: 271.1, rsi: 45, macd: 0.8, macdSignal: 0.5, analyst: "买入"},
+  MSFT: {name: "Microsoft", price: 388.84, prev: 386.74, change: 2.1, pct: 0.54, high52: 555.45, low52: 349.20, pe: 23.0, cap: "2.87T", vol: "22.1M", avgVol: "20.5M", ma5: 388.2, ma20: 385.6, ma60: 400.3, rsi: 48, macd: -0.5, macdSignal: -0.3, analyst: "强烈买入"},
+  NVDA: {name: "NVIDIA", price: 196.93, prev: 195.55, change: 1.38, pct: 0.71, high52: 236.54, low52: 157.34, pe: 29.9, cap: "4.74T", vol: "48.7M", avgVol: "42.1M", ma5: 194.2, ma20: 188.5, ma60: 175.8, rsi: 55, macd: 2.1, macdSignal: 1.5, analyst: "买入"},
+  GOOGL: {name: "Alphabet", price: 367.03, prev: 366.46, change: 0.57, pct: 0.16, high52: 408.61, low52: 172.77, pe: 28.0, cap: "4.47T", vol: "25.3M", avgVol: "22.8M", ma5: 360.1, ma20: 352.4, ma60: 338.7, rsi: 58, macd: 3.2, macdSignal: 2.1, analyst: "买入"},
+  AMZN: {name: "Amazon", price: 245.98, prev: 244.16, change: 1.82, pct: 0.75, high52: 278.56, low52: 196.00, pe: 31.8, cap: "2.63T", vol: "38.9M", avgVol: "35.2M", ma5: 242.3, ma20: 238.1, ma60: 228.5, rsi: 54, macd: 1.8, macdSignal: 1.2, analyst: "买入"},
+  "BRK-B": {name: "Berkshire Hathaway", price: 506.58, prev: 507.78, change: -1.20, pct: -0.24, high52: 542.07, low52: 455.19, pe: 15.1, cap: "1.09T", vol: "3.9M", avgVol: "5.2M", ma5: 500.2, ma20: 490.2, ma60: 482.7, rsi: 55, macd: 2.1, macdSignal: 1.5, analyst: "买入"},
+  JPM: {name: "JPMorgan", price: 339.22, prev: 337.72, change: 1.5, pct: 0.44, high52: 343.45, low52: 279.10, pe: 16.2, cap: "905B", vol: "4.4M", avgVol: "9.0M", ma5: 332.1, ma20: 325.0, ma60: 312.6, rsi: 58, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  V: {name: "Visa", price: 352.2, prev: 357.25, change: -5.05, pct: -1.41, high52: 375.51, low52: 293.89, pe: 31.1, cap: "679B", vol: "11.5M", avgVol: "8.1M", ma5: 360.0, ma20: 350.2, ma60: 340.1, rsi: 47, macd: -1.2, macdSignal: -0.5, analyst: "强烈买入"},
+  MA: {name: "Mastercard", price: 531.62, prev: 623.4, change: -91.78, pct: -14.72, high52: 640.20, low52: 480.10, pe: 42.5, cap: "572B", vol: "4.2M", avgVol: "3.8M", ma5: 618.5, ma20: 610.2, ma60: 590.3, rsi: 56, macd: 3.1, macdSignal: 2.0, analyst: "买入"},
+  BAC: {name: "Bank of America", price: 59.86, prev: 48.25, change: 11.61, pct: 24.06, high52: 52.30, low52: 36.80, pe: 15.8, cap: "368B", vol: "28.5M", avgVol: "32.1M", ma5: 47.8, ma20: 46.5, ma60: 44.2, rsi: 62, macd: 0.8, macdSignal: 0.5, analyst: "买入"},
+  WFC: {name: "Wells Fargo", price: 87.18, prev: 77.5, change: 9.68, pct: 12.49, high52: 82.40, low52: 55.20, pe: 14.2, cap: "263B", vol: "12.8M", avgVol: "14.5M", ma5: 77.2, ma20: 75.1, ma60: 70.5, rsi: 64, macd: 1.2, macdSignal: 0.8, analyst: "买入"},
+  GS: {name: "Goldman Sachs", price: 712.50, prev: 705.30, change: 7.20, pct: 1.02, high52: 745.80, low52: 510.20, pe: 22.5, cap: "228B", vol: "2.1M", avgVol: "2.5M", ma5: 708.2, ma20: 695.0, ma60: 665.3, rsi: 58, macd: 5.2, macdSignal: 3.1, analyst: "买入"},
+  MS: {name: "Morgan Stanley", price: 222.04, prev: 155.8, change: 66.24, pct: 42.52, high52: 168.50, low52: 108.30, pe: 19.8, cap: "248B", vol: "5.8M", avgVol: "6.2M", ma5: 155.0, ma20: 150.2, ma60: 142.5, rsi: 61, macd: 2.8, macdSignal: 1.5, analyst: "买入"},
+  JNJ: {name: "Johnson & Johnson", price: 259.33, prev: 263.04, change: -3.71, pct: -1.41, high52: 263.10, low52: 154.21, pe: 30.0, cap: "624B", vol: "5.1M", avgVol: "8.2M", ma5: 258.0, ma20: 250.5, ma60: 232.7, rsi: 55, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  UNH: {name: "UnitedHealth", price: 428.19, prev: 417.99, change: 10.2, pct: 2.44, high52: 630.73, low52: 234.60, pe: 31.5, cap: "380B", vol: "6.0M", avgVol: "7.6M", ma5: 415.0, ma20: 405.2, ma60: 390.5, rsi: 52, macd: 5.2, macdSignal: 3.1, analyst: "买入"},
+  PFE: {name: "Pfizer", price: 24.07, prev: 32.85, change: -8.78, pct: -26.73, high52: 42.50, low52: 28.20, pe: 18.5, cap: "185B", vol: "25.3M", avgVol: "30.2M", ma5: 33.0, ma20: 33.5, ma60: 34.2, rsi: 38, macd: -0.5, macdSignal: -0.3, analyst: "持有"},
+  ABBV: {name: "AbbVie", price: 254.65, prev: 228.5, change: 26.15, pct: 11.44, high52: 240.30, low52: 178.50, pe: 65.2, cap: "403B", vol: "4.8M", avgVol: "5.2M", ma5: 225.0, ma20: 218.5, ma60: 208.2, rsi: 62, macd: 4.2, macdSignal: 2.5, analyst: "买入"},
+  MRK: {name: "Merck", price: 128.86, prev: 138.2, change: -9.34, pct: -6.76, high52: 148.30, low52: 105.20, pe: 25.8, cap: "350B", vol: "6.5M", avgVol: "7.1M", ma5: 135.0, ma20: 130.2, ma60: 122.5, rsi: 64, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  LLY: {name: "Eli Lilly", price: 1235.56, prev: 985.5, change: 250.06, pct: 25.37, high52: 1050.80, low52: 680.20, pe: 142.5, cap: "936B", vol: "2.8M", avgVol: "3.2M", ma5: 975.0, ma20: 950.2, ma60: 890.5, rsi: 61, macd: 15.2, macdSignal: 10.5, analyst: "买入"},
+  TMO: {name: "Thermo Fisher", price: 516.62, prev: 685.3, change: -168.68, pct: -24.61, high52: 720.40, low52: 520.10, pe: 38.5, cap: "263B", vol: "1.2M", avgVol: "1.5M", ma5: 680.0, ma20: 665.2, ma60: 635.5, rsi: 58, macd: 8.5, macdSignal: 5.2, analyst: "买入"},
+  ABT: {name: "Abbott", price: 95.84, prev: 142.8, change: -46.96, pct: -32.89, high52: 155.30, low52: 108.20, pe: 35.2, cap: "248B", vol: "3.5M", avgVol: "4.2M", ma5: 140.0, ma20: 135.2, ma60: 128.5, rsi: 60, macd: 3.2, macdSignal: 1.8, analyst: "买入"},
+  DHR: {name: "Danaher", price: 194.19, prev: 305.2, change: -111.01, pct: -36.37, high52: 320.40, low52: 228.10, pe: 45.8, cap: "224B", vol: "2.1M", avgVol: "2.8M", ma5: 300.0, ma20: 290.2, ma60: 275.5, rsi: 59, macd: 5.5, macdSignal: 3.2, analyst: "买入"},
+  WMT: {name: "Walmart", price: 111.54, prev: 111.84, change: -0.3, pct: -0.27, high52: 135.16, low52: 94.23, pe: 39.0, cap: "881B", vol: "26.9M", avgVol: "21.7M", ma5: 112.0, ma20: 115.5, ma60: 118.0, rsi: 42, macd: -2.5, macdSignal: -1.5, analyst: "持有"},
+  PG: {name: "Procter & Gamble", price: 152.75, prev: 151.41, change: 1.34, pct: 0.89, high52: 180.43, low52: 137.62, pe: 21.8, cap: "348B", vol: "5.6M", avgVol: "9.0M", ma5: 148.0, ma20: 145.2, ma60: 148.5, rsi: 52, macd: 2.1, macdSignal: 1.2, analyst: "买入"},
+  KO: {name: "Coca-Cola", price: 62.35, prev: 61.80, change: 0.55, pct: 0.89, high52: 65.50, low52: 55.20, pe: 26.5, cap: "268B", vol: "10.2M", avgVol: "12.5M", ma5: 62.0, ma20: 61.2, ma60: 60.5, rsi: 55, macd: 0.5, macdSignal: 0.3, analyst: "买入"},
+  PEP: {name: "PepsiCo", price: 144.98, prev: 182.5, change: -37.52, pct: -20.56, high52: 195.80, low52: 155.20, pe: 28.5, cap: "250B", vol: "3.8M", avgVol: "4.5M", ma5: 180.0, ma20: 175.2, ma60: 168.5, rsi: 58, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  COST: {name: "Costco", price: 947.5, prev: 1085.2, change: -137.7, pct: -12.69, high52: 1120.40, low52: 820.50, pe: 62.5, cap: "481B", vol: "1.5M", avgVol: "1.8M", ma5: 1075.0, ma20: 1050.2, ma60: 985.5, rsi: 60, macd: 15.2, macdSignal: 10.5, analyst: "买入"},
+  MCD: {name: "McDonald's", price: 282.21, prev: 335.8, change: -53.59, pct: -15.96, high52: 348.20, low52: 278.50, pe: 28.5, cap: "241B", vol: "2.2M", avgVol: "2.8M", ma5: 332.0, ma20: 325.2, ma60: 310.5, rsi: 58, macd: 5.5, macdSignal: 3.2, analyst: "买入"},
+  DIS: {name: "Disney", price: 97.48, prev: 118.5, change: -21.02, pct: -17.74, high52: 142.80, low52: 92.80, pe: 28.5, cap: "215B", vol: "8.5M", avgVol: "10.2M", ma5: 112.0, ma20: 108.5, ma60: 105.2, rsi: 55, macd: 3.5, macdSignal: 2.0, analyst: "持有"},
+  NKE: {name: "Nike", price: 43.21, prev: 92.5, change: -49.29, pct: -53.29, high52: 125.50, low52: 78.50, pe: 32.5, cap: "136B", vol: "8.2M", avgVol: "9.5M", ma5: 88.0, ma20: 85.2, ma60: 82.5, rsi: 52, macd: 2.8, macdSignal: 1.5, analyst: "持有"},
+  SBUX: {name: "Starbucks", price: 108.20, prev: 106.50, change: 1.70, pct: 1.60, high52: 118.50, low52: 82.50, pe: 32.5, cap: "122B", vol: "5.8M", avgVol: "6.5M", ma5: 105.0, ma20: 100.2, ma60: 95.5, rsi: 58, macd: 4.2, macdSignal: 2.5, analyst: "买入"},
+  XOM: {name: "Exxon Mobil", price: 141.69, prev: 125.8, change: 15.89, pct: 12.63, high52: 135.20, low52: 105.80, pe: 14.2, cap: "553B", vol: "12.5M", avgVol: "14.2M", ma5: 123.0, ma20: 118.5, ma60: 112.2, rsi: 62, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  CVX: {name: "Chevron", price: 178.50, prev: 175.80, change: 2.70, pct: 1.54, high52: 195.30, low52: 148.50, pe: 16.5, cap: "328B", vol: "5.2M", avgVol: "6.8M", ma5: 175.0, ma20: 168.5, ma60: 162.2, rsi: 60, macd: 4.5, macdSignal: 2.8, analyst: "买入"},
+  COP: {name: "ConocoPhillips", price: 108.44, prev: 125.8, change: -17.36, pct: -13.8, high52: 140.50, low52: 98.50, pe: 14.5, cap: "148B", vol: "4.8M", avgVol: "5.5M", ma5: 125.0, ma20: 118.5, ma60: 112.2, rsi: 64, macd: 4.2, macdSignal: 2.5, analyst: "买入"},
+  GE: {name: "GE Aerospace", price: 366.98, prev: 278.5, change: 88.48, pct: 31.77, high52: 298.50, low52: 185.20, pe: 38.5, cap: "302B", vol: "3.2M", avgVol: "3.8M", ma5: 272.0, ma20: 262.5, ma60: 248.2, rsi: 62, macd: 8.5, macdSignal: 5.2, analyst: "买入"},
+  CAT: {name: "Caterpillar", price: 940.12, prev: 425.8, change: 514.32, pct: 120.79, high52: 458.20, low52: 328.50, pe: 22.5, cap: "207B", vol: "1.8M", avgVol: "2.2M", ma5: 418.0, ma20: 408.5, ma60: 388.2, rsi: 60, macd: 8.2, macdSignal: 5.0, analyst: "买入"},
+  BA: {name: "Boeing", price: 231.68, prev: 262.8, change: -31.12, pct: -11.84, high52: 320.50, low52: 178.20, pe: -55.2, cap: "181B", vol: "4.5M", avgVol: "5.8M", ma5: 258.0, ma20: 248.5, ma60: 232.2, rsi: 55, macd: 6.5, macdSignal: 4.2, analyst: "持有"},
+  HON: {name: "Honeywell", price: 255.30, prev: 252.80, change: 2.50, pct: 0.99, high52: 268.50, low52: 205.80, pe: 28.5, cap: "168B", vol: "2.1M", avgVol: "2.5M", ma5: 252.0, ma20: 245.5, ma60: 238.2, rsi: 56, macd: 4.2, macdSignal: 2.5, analyst: "买入"},
+  UPS: {name: "UPS", price: 111.96, prev: 158.8, change: -46.84, pct: -29.5, high52: 185.50, low52: 128.50, pe: 25.8, cap: "139B", vol: "2.5M", avgVol: "3.2M", ma5: 158.0, ma20: 152.5, ma60: 145.2, rsi: 58, macd: 4.5, macdSignal: 2.8, analyst: "持有"},
+  VZ: {name: "Verizon", price: 42.59, prev: 47.8, change: -5.21, pct: -10.9, high52: 52.50, low52: 38.50, pe: 12.5, cap: "203B", vol: "12.5M", avgVol: "15.2M", ma5: 47.5, ma20: 46.8, ma60: 45.2, rsi: 55, macd: 0.5, macdSignal: 0.3, analyst: "持有"},
+  T: {name: "AT&T", price: 21.09, prev: 28.2, change: -7.11, pct: -25.21, high52: 32.50, low52: 22.50, pe: 12.8, cap: "205B", vol: "18.5M", avgVol: "22.3M", ma5: 28.0, ma20: 27.5, ma60: 26.8, rsi: 54, macd: 0.3, macdSignal: 0.2, analyst: "持有"},
+  TMUS: {name: "T-Mobile", price: 184.73, prev: 280.8, change: -96.07, pct: -34.21, high52: 298.50, low52: 225.80, pe: 32.5, cap: "332B", vol: "3.2M", avgVol: "3.8M", ma5: 280.0, ma20: 272.5, ma60: 260.2, rsi: 60, macd: 5.5, macdSignal: 3.2, analyst: "买入"},
+  LIN: {name: "Linde", price: 525.80, prev: 518.50, change: 7.30, pct: 1.41, high52: 548.20, low52: 425.50, pe: 35.5, cap: "252B", vol: "1.2M", avgVol: "1.5M", ma5: 520.0, ma20: 510.5, ma60: 490.2, rsi: 58, macd: 6.5, macdSignal: 4.2, analyst: "买入"},
+  NEE: {name: "NextEra Energy", price: 82.50, prev: 81.20, change: 1.30, pct: 1.60, high52: 98.50, low52: 68.50, pe: 22.5, cap: "168B", vol: "8.5M", avgVol: "10.2M", ma5: 80.0, ma20: 78.5, ma60: 75.2, rsi: 52, macd: 1.5, macdSignal: 0.8, analyst: "买入"},
+  PLD: {name: "Prologis", price: 143.61, prev: 145.8, change: -2.19, pct: -1.5, high52: 158.50, low52: 115.50, pe: 42.5, cap: "137B", vol: "2.1M", avgVol: "2.8M", ma5: 145.0, ma20: 140.5, ma60: 132.2, rsi: 58, macd: 4.2, macdSignal: 2.5, analyst: "买入"},
+  SPY: {name: "SPDR S&P 500", price: 525.00, prev: 520.50, change: 4.50, pct: 0.86, high52: 545.00, low52: 485.00, pe: 22.5, cap: "550B", vol: "45.2M", avgVol: "52.3M", ma5: 522.0, ma20: 515.5, ma60: 505.2, rsi: 58, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  QQQ: {name: "Invesco QQQ", price: 487.00, prev: 482.50, change: 4.50, pct: 0.93, high52: 510.00, low52: 420.00, pe: 35.5, cap: "320B", vol: "28.5M", avgVol: "32.1M", ma5: 484.0, ma20: 478.5, ma60: 465.2, rsi: 58, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  SCHD: {name: "Schwab US Dividend", price: 345.21, prev: 28.4, change: 316.81, pct: 1115.53, high52: 30.50, low52: 25.50, pe: 15.5, cap: "58B", vol: "5.2M", avgVol: "6.8M", ma5: 28.2, ma20: 27.8, ma60: 27.2, rsi: 56, macd: 0.2, macdSignal: 0.1, analyst: "买入"},
+  TLT: {name: "iShares 20+ Year Treasury", price: 89.45, prev: 88.50, change: 0.95, pct: 1.07, high52: 105.00, low52: 82.00, pe: -1, cap: "52B", vol: "25.8M", avgVol: "30.2M", ma5: 88.0, ma20: 87.5, ma60: 88.2, rsi: 48, macd: 0.5, macdSignal: 0.3, analyst: "持有"},
+  VTI: {name: "Vanguard Total Stock", price: 302.50, prev: 299.80, change: 2.70, pct: 0.90, high52: 315.00, low52: 278.00, pe: 23.5, cap: "450B", vol: "2.1M", avgVol: "2.8M", ma5: 300.0, ma20: 295.5, ma60: 288.2, rsi: 56, macd: 3.0, macdSignal: 1.8, analyst: "买入"},
+  IWM: {name: "iShares Russell 2000", price: 238.50, prev: 235.80, change: 2.70, pct: 1.14, high52: 252.00, low52: 198.00, pe: -1, cap: "68B", vol: "18.5M", avgVol: "22.3M", ma5: 235.0, ma20: 230.5, ma60: 222.2, rsi: 55, macd: 3.5, macdSignal: 2.0, analyst: "买入"},
+  MU: {name: "Micron Technology", price: 897.24, prev: 984.75, change: -87.51, pct: -8.89, high52: 1255.00, low52: 103.38, pe: 20.3, cap: "101B", vol: "17.4M", avgVol: "51.4M", ma5: 862.0, ma20: 800.0, ma60: 650.0, rsi: 35, macd: -15, macdSignal: -8, analyst: "买入"},
+  AVGO: {name: "Broadcom", price: 370.78, prev: 373.9, change: -3.12, pct: -0.83, high52: 420.00, low52: 280.00, pe: 28.5, cap: "174B", vol: "24.5M", avgVol: "28.0M", ma5: 368.0, ma20: 355.0, ma60: 340.0, rsi: 58, macd: 8, macdSignal: 5, analyst: "买入"},
+  CRM: {name: "Salesforce", price: 169.52, prev: 165.65, change: 3.87, pct: 2.34, high52: 276.80, low52: 146.32, pe: 19.2, cap: "136B", vol: "7.4M", avgVol: "15.3M", ma5: 168.0, ma20: 172.0, ma60: 180.0, rsi: 42, macd: -2, macdSignal: -1, analyst: "买入"},
+  ADBE: {name: "Adobe", price: 221.54, prev: 218.07, change: 3.47, pct: 1.59, high52: 350.00, low52: 195.00, pe: 25.3, cap: "98B", vol: "4.8M", avgVol: "6.5M", ma5: 215.0, ma20: 210.0, ma60: 225.0, rsi: 48, macd: 5, macdSignal: 3, analyst: "买入"},
+  INTC: {name: "Intel", price: 110.39, prev: 122.2, change: -11.81, pct: -9.66, high52: 142.35, low52: 18.97, pe: -1, cap: "61B", vol: "85.8M", avgVol: "137.5M", ma5: 118.0, ma20: 108.0, ma60: 95.0, rsi: 55, macd: 10, macdSignal: 6, analyst: "持有"},
+  QCOM: {name: "Qualcomm", price: 182.97, prev: 186.48, change: -3.51, pct: -1.88, high52: 259.92, low52: 121.99, pe: 20.0, cap: "197B", vol: "15.5M", avgVol: "23.1M", ma5: 178.0, ma20: 168.0, ma60: 155.0, rsi: 62, macd: 12, macdSignal: 7, analyst: "买入"},
+  NKE: {name: "Nike", price: 43.34, prev: 44.09, change: -0.75, pct: -1.70, high52: 80.17, low52: 40.00, pe: 20.6, cap: "64B", vol: "21.1M", avgVol: "24.5M", ma5: 44.0, ma20: 45.5, ma60: 48.0, rsi: 35, macd: -1.5, macdSignal: -0.8, analyst: "买入"},
+  DIS: {name: "Walt Disney", price: 97.41, prev: 99.50, change: -2.09, pct: -2.10, high52: 124.61, low52: 92.19, pe: 15.6, cap: "169B", vol: "9.3M", avgVol: "9.5M", ma5: 100.0, ma20: 103.0, ma60: 105.0, rsi: 38, macd: -3, macdSignal: -1.5, analyst: "强烈买入"},
+  UBER: {name: "Uber", price: 72.42, prev: 74.43, change: -2.01, pct: -2.70, high52: 95.00, low52: 58.00, pe: 18.5, cap: "153B", vol: "15.8M", avgVol: "18.0M", ma5: 73.5, ma20: 72.0, ma60: 70.0, rsi: 45, macd: 0.5, macdSignal: 0.3, analyst: "买入"},
+  PYPL: {name: "PayPal", price: 45.09, prev: 45.47, change: -0.38, pct: -0.84, high52: 72.00, low52: 42.00, pe: 16.2, cap: "46B", vol: "11.5M", avgVol: "14.0M", ma5: 45.5, ma20: 45.0, ma60: 46.0, rsi: 40, macd: -0.3, macdSignal: -0.1, analyst: "持有"},
+  META: {name: "Meta Platforms, Inc.", price: 615.58, prev: 600.29004, change: 15.29, pct: 2.55, high52: 796.25, low52: 520.26, pe: 22.4, cap: "1.56T", vol: "18.2M", avgVol: "17.5M", ma5: 608.9, ma20: 602.9, ma60: 644.8, rsi: 55, macd: 2.1, macdSignal: 1.3, analyst: "强烈买入"},
+  TSLA: {name: "Tesla, Inc.", price: 402.9, prev: 419.77, change: -16.87, pct: -4.02, high52: 498.83, low52: 293.55, pe: 369.6, cap: "1.51T", vol: "38.0M", avgVol: "54.6M", ma5: 411.7, ma20: 407.6, ma60: 418.5, rsi: 45, macd: -1.2, macdSignal: -0.7, analyst: "买入"},
+  AMD: {name: "Advanced Micro Devices, Inc.", price: 516.11, prev: 552.05, change: -35.94, pct: -6.51, high52: 584.73, low52: 135.91, pe: 173.2, cap: "842B", vol: "28.7M", avgVol: "36.9M", ma5: 474.3, ma20: 469.6, ma60: 281.9, rsi: 65, macd: 9.9, macdSignal: 5.9, analyst: "强烈买入"},
+  ACN: {name: "Accenture plc", price: 142.14, prev: 136.96, change: 5.18, pct: 3.78, high52: 307.77, low52: 118.15, pe: 11.4, cap: "87B", vol: "8.7M", avgVol: "7.8M", ma5: 166.3, ma20: 164.6, ma60: 219.7, rsi: 25, macd: -13.7, macdSignal: -8.2, analyst: "买入"},
+  TXN: {name: "Texas Instruments Incorporated", price: 293.3, prev: 303.5, change: -10.2, pct: -3.36, high52: 334.03, low52: 152.73, pe: 50.1, cap: "267B", vol: "8.3M", avgVol: "8.9M", ma5: 300.4, ma20: 297.4, ma60: 216.7, rsi: 45, macd: -1.4, macdSignal: -0.8, analyst: "买入"},
+  AMGN: {name: "Amgen Inc.", price: 368.1, prev: 366.44, change: 1.66, pct: 0.45, high52: 391.29, low52: 269.77, pe: 25.6, cap: "199B", vol: "1.9M", avgVol: "2.8M", ma5: 345.6, ma20: 342.2, ma60: 336.3, rsi: 65, macd: 7.6, macdSignal: 4.6, analyst: "买入"},
+  BMY: {name: "Bristol-Myers Squibb Company", price: 57.97, prev: 56.7, change: 1.27, pct: 2.24, high52: 62.89, low52: 42.52, pe: 16.2, cap: "118B", vol: "10.0M", avgVol: "11.5M", ma5: 57.5, ma20: 56.9, ma60: 54.1, rsi: 55, macd: 1.9, macdSignal: 1.1, analyst: "买入"},
+  SCHW: {name: "The Charles Schwab Corporation", price: 101.93, prev: 100.62, change: 1.31, pct: 1.3, high52: 107.5, low52: 83.96, pe: 20.3, cap: "177B", vol: "9.4M", avgVol: "11.7M", ma5: 91.7, ma20: 90.8, ma60: 94.8, rsi: 65, macd: 12.2, macdSignal: 7.3, analyst: "买入"},
+  BLK: {name: "BlackRock, Inc.", price: 1009.43, prev: 1011.21, change: -1.78, pct: -0.18, high52: 1219.94, low52: 917.39, pe: 25.4, cap: "164B", vol: "0.5M", avgVol: "0.7M", ma5: 1047.6, ma20: 1037.3, ma60: 1062.9, rsi: 45, macd: -2.7, macdSignal: -1.6, analyst: "买入"},
+  SPGI: {name: "S&P Global Inc.", price: 443.46, prev: 447.22, change: -3.76, pct: -0.84, high52: 547.82404, low52: 361.03122, pe: 28.0, cap: "131B", vol: "2.8M", avgVol: "2.3M", ma5: 403.0, ma20: 399.0, ma60: 437.4, rsi: 65, macd: 11.1, macdSignal: 6.7, analyst: "强烈买入"},
+  ISRG: {name: "Intuitive Surgical, Inc.", price: 427.3, prev: 432.83, change: -5.53, pct: -1.28, high52: 603.88, low52: 396.68, pe: 52.0, cap: "151B", vol: "2.5M", avgVol: "2.4M", ma5: 432.0, ma20: 427.7, ma60: 488.4, rsi: 45, macd: -0.1, macdSignal: -0.1, analyst: "买入"},
+  VRTX: {name: "Vertex Pharmaceuticals Incorporated", price: 522.25, prev: 529.59, change: -7.34, pct: -1.39, high52: 533.67, low52: 362.5, pe: 31.0, cap: "133B", vol: "2.3M", avgVol: "1.4M", ma5: 455.0, ma20: 450.5, ma60: 445.2, rsi: 65, macd: 15.9, macdSignal: 9.5, analyst: "买入"},
+  ADI: {name: "Analog Devices, Inc.", price: 379.03, prev: 388.83, change: -9.8, pct: -2.52, high52: 445.91, low52: 218.37, pe: 56.3, cap: "185B", vol: "4.6M", avgVol: "4.6M", ma5: 412.5, ma20: 408.4, ma60: 318.9, rsi: 35, macd: -7.2, macdSignal: -4.3, analyst: "买入"},
+  MRVL: {name: "Marvell Technology, Inc.", price: 230.7, prev: 249.26999, change: -18.57, pct: -7.45, high52: 329.88, low52: 61.44, pe: 79.0, cap: "202B", vol: "34.9M", avgVol: "43.1M", ma5: 229.0, ma20: 226.8, ma60: 124.3, rsi: 55, macd: 1.7, macdSignal: 1.0, analyst: "强烈买入"},
+
+};
+const STOCK_NAMES = {
+  ACN: "Accenture",
+  AAPL: "Apple", MSFT: "Microsoft", NVDA: "NVIDIA", GOOGL: "Alphabet A", GOOG: "Alphabet C",
+  AMZN: "Amazon", META: "Meta Platforms", TSLA: "Tesla", AMD: "AMD", AVGO: "Broadcom",
+  CRM: "Salesforce", ORCL: "Oracle", ADBE: "Adobe", INTC: "Intel", QCOM: "Qualcomm",
+  TXN: "Texas Instruments", IBM: "IBM", NOW: "ServiceNow", UBER: "Uber", ABNB: "Airbnb",
+  PYPL: "PayPal", SHOP: "Shopify", SNOW: "Snowflake", DDOG: "Datadog", NET: "Cloudflare",
+  MDB: "MongoDB", PLTR: "Palantir", ROKU: "Roku", SQ: "Block", ZM: "Zoom",
+  COIN: "Coinbase", HOOD: "Robinhood", MRNA: "Moderna", BIIB: "Biogen", GILD: "Gilead",
+  NFLX: "Netflix", DIS: "Disney", SPOT: "Spotify", DOCU: "DocuSign",
+  CRWD: "CrowdStrike", OKTA: "Okta", TEAM: "Atlassian", PANW: "Palo Alto Networks",
+  FTNT: "Fortinet", CYBR: "CyberArk", SPLK: "Splunk", TWLO: "Twilio", FSLY: "Fastly",
+  DASH: "DoorDash", LYFT: "Lyft", PINS: "Pinterest", SNAP: "Snap",
+  ASML: "ASML", LRCX: "Lam Research", KLAC: "KLA Corp", AMAT: "Applied Materials",
+  SNPS: "Synopsys", CDNS: "Cadence", ADI: "Analog Devices", MRVL: "Marvell",
+  NXPI: "NXP Semiconductors", MPWR: "Monolithic Power", ON: "ON Semiconductor",
+  MU: "Micron Technology", STX: "Seagate", WDC: "Western Digital", HPQ: "HP", DELL: "Dell",
+  SMCI: "Super Micro", FSLR: "First Solar", ENPH: "Enphase", SEDG: "SolarEdge",
+  CSCO: "Cisco", ANET: "Arista Networks", JNPR: "Juniper", FFIV: "F5 Networks",
+  MSI: "Motorola Solutions", HPE: "Hewlett Packard Enterprise", NTAP: "NetApp",
+  GLW: "Corning", TER: "Teradyne", ENTG: "Entegris",
+  DAY: "Dayforce", GEN: "Gen Digital", TDC: "Teradata", VRSN: "Verisign",
+  BRK: "Berkshire Hathaway A", "BRK-B": "Berkshire Hathaway B",
+  JPM: "JPMorgan", V: "Visa", MA: "Mastercard",
+  BAC: "Bank of America", WFC: "Wells Fargo", GS: "Goldman Sachs", MS: "Morgan Stanley",
+  BLK: "BlackRock", C: "Citigroup", AXP: "American Express", CB: "Chubb",
+  PNC: "PNC Financial", USB: "US Bancorp", TFC: "Truist", COF: "Capital One",
+  SCHW: "Charles Schwab", BK: "BNY Mellon", STT: "State Street", SPGI: "S&P Global",
+  ICE: "Intercontinental Exchange", CME: "CME Group", MCO: "Moody's", AON: "Aon",
+  MMC: "Marsh & McLennan", PGR: "Progressive", ALL: "Allstate", TRV: "Travelers",
+  MET: "MetLife", PRU: "Prudential", AIG: "AIG", AFL: "Aflac",
+  SIVB: "SVB Financial", ZION: "Zions Bancorp", RF: "Regions Financial",
+  HBAN: "Huntington Bancshares", KEY: "KeyCorp", CFG: "Citizens Financial",
+  FITB: "Fifth Third Bancorp", CMA: "Comerica", PBCT: "People's United",
+  MTB: "M&T Bank", SBNY: "Signature Bank", PACW: "PacWest Bancorp",
+  JNJ: "Johnson & Johnson", UNH: "UnitedHealth", PFE: "Pfizer", ABBV: "AbbVie",
+  MRK: "Merck", LLY: "Eli Lilly", TMO: "Thermo Fisher", ABT: "Abbott",
+  DHR: "Danaher", BMY: "Bristol Myers", AMGN: "Amgen",
+  VRTX: "Vertex", REGN: "Regeneron", ISRG: "Intuitive Surgical", ZTS: "Zoetis",
+  BDX: "Becton Dickinson", CI: "Cigna", HUM: "Humana", ELV: "Elevance Health",
+  CVS: "CVS Health", SYK: "Stryker", BSX: "Boston Scientific", EW: "Edwards Lifesciences",
+  MDT: "Medtronic", PODD: "Insulet", ALGN: "Align Technology", DXCM: "Dexcom",
+  IDXX: "IDEXX", WAT: "Waters", RMD: "ResMed", COO: "Cooper Companies",
+  BAX: "Baxter", ZBH: "Zimmer Biomet", HCA: "HCA Healthcare",
+  CNC: "Centene", MOH: "Molina Healthcare",
+  WMT: "Walmart", PG: "Procter & Gamble", KO: "Coca-Cola", PEP: "PepsiCo",
+  COST: "Costco", MCD: "McDonald's", NKE: "Nike",
+  SBUX: "Starbucks", LOW: "Lowe's", HD: "Home Depot", TJX: "TJX Companies",
+  DG: "Dollar General", DLTR: "Dollar Tree", ROST: "Ross Stores", BURL: "Burlington",
+  TGT: "Target", CAG: "Conagra", K: "Kellogg", GIS: "General Mills",
+  HSY: "Hershey", MDLZ: "Mondelez", KHC: "Kraft Heinz", CPB: "Campbell Soup",
+  SJM: "J.M. Smucker", MKC: "McCormick", CHD: "Church & Dwight", CL: "Colgate-Palmolive",
+  EL: "Estee Lauder", KVUE: "Kenvue", COTY: "Coty", ORLY: "O'Reilly Auto",
+  AZO: "AutoZone", AAP: "Advance Auto", GPC: "Genuine Parts", FAST: "Fastenal",
+  CSX: "CSX", NSC: "Norfolk Southern", UNP: "Union Pacific", UPS: "UPS",
+  FDX: "FedEx", LULU: "Lululemon", DECK: "Deckers Outdoor", ULTA: "Ulta Beauty",
+  TPR: "Tapestry", RL: "Ralph Lauren", VFC: "VF Corp",
+  HRL: "Hormel", KDP: "Keurig Dr Pepper", MNST: "Monster Beverage", STZ: "Constellation Brands",
+  MO: "Altria", BTI: "British American Tobacco", PM: "Philip Morris",
+  XOM: "Exxon Mobil", CVX: "Chevron", COP: "ConocoPhillips", EOG: "EOG Resources",
+  SLB: "Schlumberger", OXY: "Occidental Petroleum", MPC: "Marathon Petroleum",
+  VLO: "Valero", PSX: "Phillips 66", WMB: "Williams", KMI: "Kinder Morgan",
+  OKE: "ONEOK", BKR: "Baker Hughes", HAL: "Halliburton", DVN: "Devon Energy",
+  FANG: "Diamondback Energy", MRO: "Marathon Oil", APA: "APA Corp",
+  CTRA: "Coterra Energy", EPD: "Enterprise Products", ET: "Energy Transfer",
+  MPLX: "MPLX LP", PSXP: "Phillips 66 Partners",
+  GE: "GE Aerospace", CAT: "Caterpillar", BA: "Boeing", HON: "Honeywell",
+  MMM: "3M", RTX: "RTX Corp", LMT: "Lockheed Martin", NOC: "Northrop Grumman",
+  GD: "General Dynamics", TDG: "TransDigm", EMR: "Emerson Electric",
+  ETN: "Eaton", ITW: "Illinois Tool Works", WM: "Waste Management", RSG: "Republic Services",
+  CMI: "Cummins", PCAR: "PACCAR", F: "Ford", GM: "General Motors",
+  DAL: "Delta Air Lines", UAL: "United Airlines", AAL: "American Airlines",
+  LUV: "Southwest Airlines", JBLU: "JetBlue", ALK: "Alaska Air",
+  ODFL: "Old Dominion", EXPD: "Expeditors", CHRW: "C.H. Robinson",
+  MAS: "Masco", PH: "Parker Hannifin", SWK: "Stanley Black & Decker",
+  SNA: "Snap-on", GWW: "W.W. Grainger", XYL: "Xylem",
+  AME: "Ametek", ROK: "Rockwell Automation", DOV: "Dover", IEX: "IDEX",
+  FTV: "Fortive", VLTO: "Veralto",
+  VZ: "Verizon", T: "AT&T", TMUS: "T-Mobile", CMCSA: "Comcast",
+  CHTR: "Charter Communications", LYV: "Live Nation", TTWO: "Take-Two", EA: "Electronic Arts",
+  MTCH: "Match Group", IAC: "IAC",
+  WBD: "Warner Bros Discovery", PARA: "Paramount", FOX: "Fox Corp",
+  DISH: "DISH Network", LUMN: "Lumen Technologies", WOW: "WideOpenWest",
+  LIN: "Linde", SHW: "Sherwin-Williams", APD: "Air Products", ECL: "Ecolab",
+  FCX: "Freeport-McMoRan", NUE: "Nucor", STLD: "Steel Dynamics", DOW: "Dow",
+  DD: "DuPont", PPG: "PPG Industries", IFF: "IFF", ALB: "Albemarle",
+  SQM: "SQM", MOS: "Mosaic", CF: "CF Industries", NEM: "Newmont",
+  GOLD: "Barrick Gold", FMC: "FMC Corp", EMN: "Eastman Chemical",
+  LYB: "LyondellBasell", CE: "Celanese", ASH: "Ashland", OLN: "Olin",
+  NEE: "NextEra Energy", DUK: "Duke Energy", SO: "Southern Company",
+  AEP: "American Electric Power", EXC: "Exelon", SRE: "Sempra Energy",
+  XEL: "Xcel Energy", PEG: "Public Service Enterprise", ED: "Consolidated Edison",
+  WEC: "WEC Energy", D: "Dominion Energy", ES: "Eversource Energy",
+  FE: "FirstEnergy", AEE: "Ameren", ETR: "Entergy", CNP: "CenterPoint Energy",
+  NI: "NiSource", LNT: "Alliant Energy", CMS: "CMS Energy",
+  AWK: "American Water Works", AES: "AES Corp", NRG: "NRG Energy",
+  SPY: "SPDR S&P 500", QQQ: "Invesco QQQ", IWM: "iShares Russell 2000",
+  VTI: "Vanguard Total Stock", SCHD: "Schwab US Dividend", TLT: "iShares 20+ Year Treasury",
+  HYG: "iShares High Yield", LQD: "iShares Investment Grade", AGG: "iShares Core US Aggregate",
+  BND: "Vanguard Total Bond", GLD: "SPDR Gold", USO: "US Oil Fund",
+  VNQ: "Vanguard Real Estate", XLF: "Financial Select SPDR", XLK: "Technology Select SPDR",
+  XLE: "Energy Select SPDR", XLV: "Health Care Select SPDR", XLI: "Industrial Select SPDR",
+  XLP: "Consumer Staples SPDR", XLU: "Utilities Select SPDR", XLB: "Materials Select SPDR",
+  XRT: "SPDR S&P Retail", KRE: "SPDR S&P Regional Banking", SMH: "VanEck Semiconductor",
+  SOXX: "iShares Semiconductor", ARKK: "ARK Innovation",
+  ADSK: "Autodesk", ANSS: "Ansys", CDW: "CDW", EPAM: "EPAM Systems",
+  FICO: "Fair Isaac", GTLB: "GitLab", HUBS: "HubSpot", INTU: "Intuit",
+  MANH: "Manhattan Associates", PAYC: "Paycom", PCTY: "Paylocity",
+  PSTG: "Pure Storage", S: "SentinelOne", TOST: "Toast", VEEV: "Veeva",
+  WDAY: "Workday", ZS: "Zscaler", ZI: "ZoomInfo", PATH: "UiPath",
+  CFLT: "Confluent", SPT: "Sprout Social", BILL: "Bill.com", DLO: "DLocal",
+  GLBE: "Global-e Online", MELI: "MercadoLibre", SE: "Sea Limited",
+  U: "Unity Software", RBLX: "Roblox", EA: "Electronic Arts",
+  ATVI: "Activision Blizzard", TTWO: "Take-Two", ZNGA: "Zynga",
+  CART: "Maplebear", DXYZ: "DE&I Holdings", DJT: "Trump Media",
+  RDDT: "Reddit", ARM: "Arm Holdings", ASTS: "AST SpaceMobile",
+  APP: "AppLovin", IOT: "Samsara", CELH: "Celsius Holdings",
+  NVO: "Novo Nordisk", TTE: "TotalEnergies", SHEL: "Shell",
+  BP: "BP", EQNR: "Equinor", ENI: "Eni", RDSA: "Royal Dutch Shell",
+  TSM: "Taiwan Semiconductor", SONY: "Sony", RIO: "Rio Tinto",
+  BHP: "BHP Group", VALE: "Vale", MT: "ArcelorMittal",
+  SAP: "SAP SE", SAN: "Banco Santander", HSBC: "HSBC Holdings",
+  UBS: "UBS Group", CS: "Credit Suisse", DB: "Deutsche Bank",
+  NOK: "Nokia", ERIC: "Ericsson", PHG: "Philips", STM: "STMicroelectronics"
+};
+const INDICES = {
+  "^GSPC": {name: "S&P 500", price: 7503.85, prev: 7537.43, change: -33.58, pct: -0.45},
+  "^IXIC": {name: "NASDAQ", price: 25818.69, prev: 26121.16, change: -302.47, pct: -1.16},
+  "^DJI": {name: "Dow Jones", price: 53055.91, prev: 52900.07, change: 155.84, pct: 0.29},
+  "^VIX": {name: "VIX", price: 15.57, prev: 16.15, change: -0.58, pct: -3.59}
+};
+// Dynamic date - always shows today
+function getToday(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();}
+function getYesterday(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();}
+var TODAY=getToday(),YESTERDAY=getYesterday();
+
+const SIGNALS = [
+  {date: TODAY, ticker: "NVDA", type: "BUY", price: 196.93, target: 210, stop: 175, confidence: 85, reason: "均线多头排列，RSI处于强势区间，MACD金叉运行中"},
+  {date: TODAY, ticker: "META", type: "STRONG_BUY", price: 615.58, target: 650, stop: 560, confidence: 92, reason: "MACD金叉确认，分析师一致强烈买入"},
+  {date: TODAY, ticker: "JPM", type: "BUY", price: 339.22, target: 360, stop: 315, confidence: 82, reason: "金融股受益利率环境，突破52周高点"},
+  {date: YESTERDAY, ticker: "AAPL", type: "BUY", price: 310.66, target: 328, stop: 298, confidence: 78, reason: "价格站稳60日均线上方，成交量温和放大"},
+  {date: YESTERDAY, ticker: "MSFT", type: "HOLD", price: 388.84, target: 400, stop: 370, confidence: 55, reason: "价格在60日均线附近震荡，等待方向选择"},
+  {date: YESTERDAY, ticker: "TSLA", type: "HOLD", price: 402.9, target: 450, stop: 380, confidence: 50, reason: "RSI接近超买区域，短期可能有回调"},
+  {date: YESTERDAY, ticker: "AMD", type: "HOLD", price: 516.11, target: 580, stop: 500, confidence: 60, reason: "涨幅较大，等待回踩确认支撑"},
+  {date: YESTERDAY, ticker: "XOM", type: "BUY", price: 141.69, target: 135, stop: 118, confidence: 75, reason: "能源股受益油价企稳，多头排列"},
+  {date: YESTERDAY, ticker: "LLY", type: "BUY", price: 1235.56, target: 1050, stop: 920, confidence: 88, reason: "GLP-1药物需求强劲，业绩超预期"}
+];
+// ===== AUTO-GENERATE TRADE LEVELS =====
+function generateBuyLevels(ticker,cost){
+  var s=STOCKS[ticker];var price=s?s.price:(cost||100);
+  return [{price:round2(price*0.95),label:"首次建仓",pct:"-5%",reason:"回调5%技术支撑位"},{price:round2(price*0.88),label:"加仓",pct:"-12%",reason:"深度回调均线支撑"},{price:round2(price*0.80),label:"重仓",pct:"-20%",reason:"极端恐慌区域"}];
+}
+function generateSellLevels(ticker,cost){
+  var s=STOCKS[ticker];var price=s?s.price:(cost||100);
+  return [{price:round2(price*1.05),label:"减仓",pct:"+5%",reason:"短期目标位减仓锁定"},{price:round2(price*1.12),label:"止盈",pct:"+12%",reason:"中期目标位分批止盈"},{price:round2(price*1.20),label:"清仓",pct:"+20%",reason:"长期目标位清仓"}];
+}
+function round2(v){return Math.round(v*100)/100;}
+
+var DEFAULT_POSITIONS={
+  aggressive:[
+    {ticker:"NVDA",shares:350,cost:138.50,strategy:"AI芯片龙头，受益于算力需求爆发，长期持有，波段降成本",buyLevels:[{price:185.00,label:"首次建仓",pct:"-5.4%",reason:"回踩20日均线支撑，技术面企稳"},{price:175.00,label:"加仓",pct:"-10.5%",reason:"接近60日均线强支撑，PE降至合理区间"},{price:157.34,label:"重仓",pct:"-19.5%",reason:"52周低点附近，历史性强支撑"}],sellLevels:[{price:210.00,label:"减仓",pct:"+7.4%",reason:"达到近期目标位R1，可减仓锁定利润"},{price:220.00,label:"止盈",pct:"+12.5%",reason:"接近52周高点前高压力位"},{price:236.54,label:"清仓",pct:"+21.0%",reason:"52周新高，极端高估清仓"}],stopLoss:150.00,stopReason:"跌破52周低点，趋势转空"},
+    {ticker:"AAPL",shares:520,cost:218.00,strategy:"苹果生态护城河深厚，现金流强劲，适合负成本策略",buyLevels:[{price:301.20,label:"首次建仓",pct:"-3.7%",reason:"回踩20日均线，MACD金叉确认"},{price:285.40,label:"加仓",pct:"-8.7%",reason:"60日均线强支撑，估值回归合理"},{price:250.00,label:"重仓",pct:"-20.0%",reason:"深度回调至前期震荡平台"}],sellLevels:[{price:317.40,label:"减仓",pct:"+1.5%",reason:"52周高点附近，前高压力位减仓"},{price:325.00,label:"止盈",pct:"+3.9%",reason:"突破前高后目标位R2"},{price:340.00,label:"清仓",pct:"+8.7%",reason:"极端高估区域，清仓等待回调"}],stopLoss:230.00,stopReason:"跌破年线支撑，长期趋势转弱"},
+    {ticker:"TSLA",shares:180,cost:318.00,strategy:"高波动标的，RSI超买注意回调，适合网格交易",buyLevels:[{price:398.78,label:"首次建仓",pct:"-5.0%",reason:"RSI从超买回落，回踩5日均线"},{price:365.40,label:"加仓",pct:"-13.0%",reason:"回踩60日均线支撑，技术性强支撑"},{price:318.00,label:"重仓",pct:"-24.2%",reason:"前期低点平台，极端恐惧区域建仓"}],sellLevels:[{price:440.00,label:"减仓",pct:"+4.8%",reason:"R1阻力位，短期涨幅过大减仓锁定"},{price:460.00,label:"止盈",pct:"+9.6%",reason:"R2阻力位，分批止盈"},{price:498.83,label:"清仓",pct:"+18.8%",reason:"52周新高，估值泡沫区域清仓"}],stopLoss:288.77,stopReason:"跌破52周低点，空头趋势确认"},
+    {ticker:"AMD",shares:450,cost:385.00,strategy:"AI芯片第二龙头，弹性大，波动剧烈注意仓位控制",buyLevels:[{price:524.45,label:"首次建仓",pct:"-5.0%",reason:"短期涨幅过大回调5%建仓"},{price:490.00,label:"加仓",pct:"-11.2%",reason:"回踩20日均线，量能萎缩止跌"},{price:450.20,label:"重仓",pct:"-18.4%",reason:"60日均线强支撑，深度回调建仓"}],sellLevels:[{price:572.50,label:"减仓",pct:"+3.7%",reason:"当日高点阻力位，减仓锁定部分利润"},{price:584.73,label:"止盈",pct:"+5.9%",reason:"52周高点附近，前高压力止盈"},{price:610.00,label:"清仓",pct:"+10.5%",reason:"突破52周高后放量滞涨清仓"}],stopLoss:400.00,stopReason:"跌破60日均线+前期平台支撑"},
+    {ticker:"META",shares:95,cost:458.00,strategy:"AI+元宇宙双重叙事，MACD金叉确认，强烈买入信号",buyLevels:[{price:578.30,label:"首次建仓",pct:"-3.7%",reason:"回踩20日均线支撑，企稳建仓"},{price:520.26,label:"加仓",pct:"-13.3%",reason:"52周低点反弹确认后加仓"},{price:500.00,label:"重仓",pct:"-16.7%",reason:"深度回调至前期震荡区间上沿"}],sellLevels:[{price:620.50,label:"减仓",pct:"+3.4%",reason:"R1阻力位，短期乖离率过大减仓"},{price:650.00,label:"止盈",pct:"+8.3%",reason:"R2目标位，突破前高后分批止盈"},{price:700.00,label:"清仓",pct:"+16.6%",reason:"极端高估区域，清仓等待回调"}],stopLoss:480.00,stopReason:"跌破52周低点反弹确认失败"},
+    {ticker:"AMZN",shares:220,cost:168.00,strategy:"AWS+电商双轮驱动，PE合理，适合稳健持有",buyLevels:[{price:238.10,label:"首次建仓",pct:"-2.5%",reason:"回踩20日均线，多头排列延续"},{price:228.50,label:"加仓",pct:"-6.4%",reason:"60日均线强支撑，基本面稳固"},{price:210.00,label:"重仓",pct:"-14.0%",reason:"深度回调至前期震荡平台上沿"}],sellLevels:[{price:255.00,label:"减仓",pct:"+4.4%",reason:"R1阻力位，阶段性减仓"},{price:265.00,label:"止盈",pct:"+8.5%",reason:"R2目标位，分批止盈"},{price:278.56,label:"清仓",pct:"+14.1%",reason:"52周高点附近，清仓锁定利润"}],stopLoss:196.00,stopReason:"跌破52周低点，趋势彻底转空"},
+    {ticker:"GOOGL",shares:180,cost:148.50,strategy:"搜索+云计算+AI全栈布局，多头排列运行中",buyLevels:[{price:352.40,label:"首次建仓",pct:"-3.8%",reason:"回踩20日均线支撑"},{price:338.70,label:"加仓",pct:"-7.6%",reason:"60日均线强支撑，基本面稳健"},{price:310.00,label:"重仓",pct:"-15.4%",reason:"深度回调至前期平台支撑"}],sellLevels:[{price:380.00,label:"减仓",pct:"+3.7%",reason:"R1阻力位，短期乖离过大减仓"},{price:395.00,label:"止盈",pct:"+7.8%",reason:"R2目标位，分批止盈锁定"},{price:408.61,label:"清仓",pct:"+11.5%",reason:"52周高点附近，清仓等待"}],stopLoss:290.00,stopReason:"跌破60日均线+前期平台支撑"}
+  ],
+  stable:[
+    {ticker:"MSFT",shares:260,cost:372.00,strategy:"云计算龙头，业绩稳定，适合稳健型核心持仓",buyLevels:[{price:385.60,label:"首次建仓",pct:"-0.3%",reason:"20日均线附近震荡企稳建仓"},{price:360.00,label:"加仓",pct:"-6.9%",reason:"深度回调至前期平台支撑"},{price:349.20,label:"重仓",pct:"-9.7%",reason:"52周低点附近，极端低估建仓"}],sellLevels:[{price:400.00,label:"减仓",pct:"+3.4%",reason:"60日均线压力位，震荡区间上沿减仓"},{price:420.00,label:"止盈",pct:"+8.6%",reason:"突破震荡区间后目标位"},{price:450.00,label:"清仓",pct:"+16.4%",reason:"接近历史前高，清仓锁定"}],stopLoss:340.00,stopReason:"跌破52周低点，长期趋势转弱"},
+    {ticker:"BRK-B",shares:200,cost:480.00,strategy:"巴菲特旗舰，抗跌性强，核心防御持仓",buyLevels:[{price:495.00,label:"首次建仓",pct:"-2.3%",reason:"小幅回调建仓"},{price:480.00,label:"加仓",pct:"-5.2%",reason:"接近60日均线支撑"},{price:455.00,label:"重仓",pct:"-10.2%",reason:"深度回调至52周低点附近"}],sellLevels:[{price:520.00,label:"减仓",pct:"+2.6%",reason:"前期高点压力位减仓"},{price:535.00,label:"止盈",pct:"+5.6%",reason:"突破前高后目标位"},{price:542.00,label:"清仓",pct:"+7.0%",reason:"52周高点附近清仓"}],stopLoss:440.00,stopReason:"跌破年线支撑"},
+    {ticker:"JPM",shares:180,cost:310.00,strategy:"美国最大银行，受益于高利率环境，稳健增长",buyLevels:[{price:328.00,label:"首次建仓",pct:"-2.9%",reason:"回踩20日均线支撑"},{price:312.00,label:"加仓",pct:"-7.6%",reason:"60日均线强支撑"},{price:279.00,label:"重仓",pct:"-17.4%",reason:"52周低点极端低估"}],sellLevels:[{price:343.00,label:"减仓",pct:"+1.6%",reason:"52周高点附近减仓"},{price:355.00,label:"止盈",pct:"+5.1%",reason:"突破前高后目标位"},{price:370.00,label:"清仓",pct:"+9.6%",reason:"极端高估清仓"}],stopLoss:265.00,stopReason:"跌破52周低点"}
+  ],
+  defensive:[
+    {ticker:"V",shares:150,cost:340.00,strategy:"全球支付网络龙头，护城河极深，长期稳定",buyLevels:[{price:348.00,label:"首次建仓",pct:"-2.6%",reason:"回踩20日均线"},{price:335.00,label:"加仓",pct:"-6.2%",reason:"60日均线支撑"},{price:294.00,label:"重仓",pct:"-17.7%",reason:"52周低点极端低估"}],sellLevels:[{price:364.00,label:"减仓",pct:"+1.9%",reason:"52周高点减仓"},{price:376.00,label:"止盈",pct:"+5.2%",reason:"突破前高"},{price:390.00,label:"清仓",pct:"+9.2%",reason:"极端高估清仓"}],stopLoss:275.00,stopReason:"跌破52周低点"},
+    {ticker:"JNJ",shares:120,cost:205.00,strategy:"医药巨头，防御性蓝筹，适合收息",buyLevels:[{price:252.00,label:"首次建仓",pct:"-2.8%",reason:"回踩20日均线"},{price:242.00,label:"加仓",pct:"-6.7%",reason:"60日均线支撑"},{price:215.00,label:"重仓",pct:"-17.1%",reason:"52周低点极端低估"}],sellLevels:[{price:268.00,label:"减仓",pct:"+3.3%",reason:"52周高点减仓"},{price:278.00,label:"止盈",pct:"+7.2%",reason:"突破前高"},{price:290.00,label:"清仓",pct:"+11.8%",reason:"极端高估清仓"}],stopLoss:200.00,stopReason:"跌破52周低点"},
+    {ticker:"PG",shares:100,cost:178.00,strategy:"消费必需品龙头，抗衰退能力强",buyLevels:[{price:189.00,label:"首次建仓",pct:"-2.8%",reason:"回踩20日均线"},{price:182.00,label:"加仓",pct:"-6.4%",reason:"60日均线支撑"},{price:165.00,label:"重仓",pct:"-15.2%",reason:"52周低点极端低估"}],sellLevels:[{price:200.00,label:"减仓",pct:"+2.8%",reason:"52周高点减仓"},{price:208.00,label:"止盈",pct:"+7.0%",reason:"突破前高"},{price:218.00,label:"清仓",pct:"+12.1%",reason:"极端高估清仓"}],stopLoss:155.00,stopReason:"跌破52周低点"},
+    {ticker:"KO",shares:200,cost:62.00,strategy:"可口可乐，百年品牌，稳定分红",buyLevels:[{price:66.50,label:"首次建仓",pct:"-2.9%",reason:"回踩20日均线"},{price:64.00,label:"加仓",pct:"-6.6%",reason:"60日均线支撑"},{price:58.00,label:"重仓",pct:"-15.3%",reason:"52周低点极端低估"}],sellLevels:[{price:70.50,label:"减仓",pct:"+2.9%",reason:"52周高点减仓"},{price:73.00,label:"止盈",pct:"+6.6%",reason:"突破前高"},{price:76.00,label:"清仓",pct:"+11.0%",reason:"极端高估清仓"}],stopLoss:54.00,stopReason:"跌破52周低点"}
+  ]
+};
+
+// Load from localStorage or use defaults
+var POSITIONS;
+try{var saved=localStorage.getItem('us_stock_positions');POSITIONS=saved?JSON.parse(saved):JSON.parse(JSON.stringify(DEFAULT_POSITIONS));}catch(e){POSITIONS=JSON.parse(JSON.stringify(DEFAULT_POSITIONS));}
+function savePortfolio(){try{localStorage.setItem('us_stock_positions',JSON.stringify(POSITIONS));}catch(e){}}
+
+// ===== PORTFOLIO CRUD =====
+var showAddModal=false,showEditModal=false;
+var editTicker="",editShares="",editCost="",editStrategy="",editStopLoss="";
+function openAddModal(){showAddModal=true;showEditModal=false;refreshPage();}
+function openEditModal(ticker){var pos=POSITIONS[portfolioTab].find(function(p){return p.ticker===ticker;});if(!pos)return;editTicker=pos.ticker;editShares=pos.shares;editCost=pos.cost;editStrategy=pos.strategy||"";editStopLoss=pos.stopLoss||"";showEditModal=true;showAddModal=false;refreshPage();}
+function closeModal(){showAddModal=false;showEditModal=false;refreshPage();}
+function addPosition(ticker,shares,cost,strategy,stopLoss){
+  ticker=ticker.toUpperCase().trim();shares=parseInt(shares);cost=parseFloat(cost);
+  if(!ticker||!shares||!cost||shares<=0||cost<=0){alert("请填写完整信息");return;}
+  var exists=POSITIONS[portfolioTab].find(function(p){return p.ticker===ticker;});
+  if(exists){alert(ticker+" 已存在，请删除后再添加");return;}
+  var s=STOCKS[ticker];var price=s?s.price:cost;
+  POSITIONS[portfolioTab].push({ticker:ticker,shares:shares,cost:cost,strategy:strategy||"",buyLevels:generateBuyLevels(ticker,cost),sellLevels:generateSellLevels(ticker,cost),stopLoss:parseFloat(stopLoss)||round2(price*0.85),stopReason:"跌破止损位自动止损"});
+  savePortfolio();closeModal();
+}
+function removePosition(ticker){if(!confirm("确定删除 "+ticker+" 的持仓？"))return;POSITIONS[portfolioTab]=POSITIONS[portfolioTab].filter(function(p){return p.ticker!==ticker;});if(expandedPos===ticker)expandedPos=null;savePortfolio();refreshPage();}
+function saveEditPosition(){var pos=POSITIONS[portfolioTab].find(function(p){return p.ticker===editTicker;});if(!pos)return;pos.shares=parseInt(editShares)||pos.shares;pos.cost=parseFloat(editCost)||pos.cost;pos.strategy=editStrategy;pos.stopLoss=parseFloat(editStopLoss)||pos.stopLoss;savePortfolio();closeModal();}
+function resetPortfolio(){if(!confirm("确定重置为默认持仓？所有自定义修改将丢失！"))return;POSITIONS=JSON.parse(JSON.stringify(DEFAULT_POSITIONS));savePortfolio();refreshPage();}
+
+
+
+// ===== REAL-TIME DATA SYSTEM =====
+var TWELVE_DATA_API_KEY = localStorage.getItem('td_api_key') || '9f67edf9dd66432b9773e842dcf852b7';
+var lastUpdateTime = null;
+var updateInterval = null;
+var isUpdating = false;
+var lastDataSource = '内置缓存';
+var sourceHealth = {ifind:'未知',yahoo:'未知',sp:'未知',twelve:'未知'};
+
+function formatTime(date){
+  var h=date.getHours(),m=date.getMinutes(),s=date.getSeconds();
+  return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+
+function showUpdateStatus(msg, type){
+  var el=document.getElementById('updateStatus');
+  if(el){el.innerHTML=msg;el.className='api-status '+(type||'warn');}
+}
+
+function showLastUpdate(){
+  var el=document.getElementById('lastUpdate');
+  if(el&&lastUpdateTime){el.textContent='上次更新: '+formatTime(lastUpdateTime);}
+}
+
+function showDataSourceStatus(){
+  var el=document.getElementById('dsStatus');
+  if(!el)return;
+  var html = '<span style="font-size:11px;color:var(--muted)">数据源: ';
+  var srcs = [];
+  if(sourceHealth.ifind==='正常')srcs.push('<span style="color:var(--green)">iFinD</span>');
+  else if(sourceHealth.ifind==='异常')srcs.push('<span style="color:var(--red)">iFinD</span>');
+  else srcs.push('<span style="color:var(--muted)">iFinD</span>');
+  if(sourceHealth.yahoo==='正常')srcs.push('<span style="color:var(--green)">Yahoo</span>');
+  else if(sourceHealth.yahoo==='异常')srcs.push('<span style="color:var(--red)">Yahoo</span>');
+  else srcs.push('<span style="color:var(--muted)">Yahoo</span>');
+  if(sourceHealth.twelve==='正常')srcs.push('<span style="color:var(--green)">TD</span>');
+  else if(sourceHealth.twelve==='异常')srcs.push('<span style="color:var(--red)">TD</span>');
+  else srcs.push('<span style="color:var(--muted)">TD</span>');
+  html += srcs.join(' | ');
+  html += ' | 当前: <span style="color:var(--accent)">' + lastDataSource + '</span></span>';
+  el.innerHTML = html;
+}
+
+function fmtVol(v){
+  if(v>=1e9)return(v/1e9).toFixed(1)+'B';
+  if(v>=1e6)return(v/1e6).toFixed(1)+'M';
+  if(v>=1e3)return(v/1e3).toFixed(1)+'K';
+  return v.toString();
+}
+
+// ===== SOURCE 1: LOCAL prices.json (iFinD+Yahoo+S&P aggregated) =====
+async function fetchLocalPrices(){
+  try{
+    var ctrl=new AbortController();
+    var t=setTimeout(function(){ctrl.abort();},5000);
+    var resp=await fetch('./data/prices.json?v='+Date.now(),{signal:ctrl.signal});
+    clearTimeout(t);
+    if(!resp.ok)return {err:'HTTP_'+resp.status};
+    var data=await resp.json();
+    if(!data.prices)return {err:'NO_DATA'};
+    return {ok:data};
+  }catch(e){return {err:e.message||'NETWORK'};}
+}
+
+function applyLocalPrices(data){
+  var prices=data.prices;
+  var updated=0;
+  var sources={iFinD:0,Yahoo:0,'S&P':0};
+  Object.keys(prices).forEach(function(t){
+    if(STOCKS[t]){
+      var info=prices[t];
+      var s=STOCKS[t];
+      var np=info.price;
+      if(np&&np!==s.price){
+        s.prev=s.price;
+        s.price=np;
+        s.change=round2(np-s.prev);
+        s.pct=round2(s.change/s.prev*100);
+        updated++;
+        if(info.source)sources[info.source]=(sources[info.source]||0)+1;
+      }
+    }
+  });
+  return {updated:updated,sources:sources,updatedAt:data.updated_at};
+}
+
+function round2(v){return Math.round(v*100)/100;}
+
+// ===== SOURCE 2: TWELVE DATA API =====
+async function tdFetch(symbol){
+  var key=TWELVE_DATA_API_KEY;
+  if(!key||key==='demo')return {err:'NO_KEY'};
+  try{
+    var ctrl=new AbortController();
+    var t=setTimeout(function(){ctrl.abort();},4000);
+    var resp=await fetch('https://api.twelvedata.com/quote?symbol='+encodeURIComponent(symbol)+'&apikey='+key,{signal:ctrl.signal});
+    clearTimeout(t);
+    var data=await resp.json();
+    if(data.code)return {err:data.message||'API_ERROR',status:data.status};
+    return {ok:data};
+  }catch(e){return {err:e.message||'NETWORK'};}
+}
+
+function applyTdQuote(q){
+  var sym=q.symbol;var changed=false;
+  var idxMap={"SPX":"^GSPC","NDX":"^IXIC","DJI":"^DJI","VIX":"^VIX"};
+  if(STOCKS[sym]){
+    var s=STOCKS[sym];
+    var np=parseFloat(q.close||q.price||0);
+    var pp=parseFloat(q.previous_close||s.prev);
+    if(np&&np!==s.price){s.price=np;s.prev=pp;s.change=np-pp;s.pct=pp?(s.change/pp*100):0;if(q.volume)s.vol=fmtVol(parseFloat(q.volume));changed=true;}
+  }
+  var ik=idxMap[sym];
+  if(ik&&INDICES[ik]){
+    var ix=INDICES[ik],ip=parseFloat(q.close||q.price||0),ipp=parseFloat(q.previous_close||ix.prev);
+    if(ip&&ip!==ix.price){ix.price=ip;ix.prev=ipp;ix.change=ip-ipp;ix.pct=ipp?(ix.change/ipp*100):0;changed=true;}
+  }
+  return changed;
+}
+
+// ===== MULTI-SOURCE UPDATE WITH FALLBACK =====
+async function updateRealtimeData(){
+  if(isUpdating)return;
+  isUpdating=true;
+  showUpdateStatus('正在检查数据更新...', 'warn');
+  lastUpdateTime=new Date();
+  var updated=0;
+
+  // === SOURCE 1: LOCAL prices.json (primary - iFinD+Yahoo+S&P) ===
+  var local=await fetchLocalPrices();
+  if(local.ok){
+    var result=applyLocalPrices(local.ok);
+    updated=result.updated;
+    lastDataSource='iFinD+Yahoo聚合';
+    sourceHealth.ifind='正常';sourceHealth.yahoo='正常';
+    showUpdateStatus('已更新 '+updated+' 只 (iFinD+Yahoo) '+local.ok.updated_at, 'ok');
+    refreshPage();showLastUpdate();showDataSourceStatus();
+    isUpdating=false;return;
+  }else{
+    sourceHealth.ifind='异常';sourceHealth.yahoo='异常';
+    console.log('[Local prices.json]',local.err);
+  }
+
+  // === SOURCE 2: TWELVE DATA API (fallback) ===
+  var key=TWELVE_DATA_API_KEY;
+  if(key&&key!=='demo'){
+    showUpdateStatus('本地数据暂不可用，尝试 Twelve Data...', 'warn');
+    var core=['AAPL','MSFT','NVDA','GOOGL','AMZN','META','TSLA','AMD','JPM','V','UNH','WMT','PG','XOM','LLY'];
+    var tdUpdated=0;
+    for(var i=0;i<core.length;i++){
+      try{
+        var r=await tdFetch(core[i]);
+        if(r.ok&&applyTdQuote(r.ok))tdUpdated++;
+      }catch(e){}
+    }
+    if(tdUpdated>0){
+      updated=tdUpdated;
+      lastDataSource='Twelve Data';
+      sourceHealth.twelve='正常';
+      showUpdateStatus('已更新 '+tdUpdated+' 只 (Twelve Data)', 'ok');
+      refreshPage();showLastUpdate();showDataSourceStatus();
+      isUpdating=false;return;
+    }else{
+      sourceHealth.twelve='异常';
+    }
+  }
+
+  // === SOURCE 3: BUILT-IN CACHE (last resort) ===
+  lastDataSource='内置缓存';
+  showUpdateStatus('显示内置数据 (数据源暂时不可用)', 'warn');
+  showLastUpdate();showDataSourceStatus();
+  isUpdating=false;
+}
+
+function startAutoUpdate(){
+  if(updateInterval)clearInterval(updateInterval);
+  updateRealtimeData();
+  updateInterval=setInterval(updateRealtimeData,60000);
+}
+
+function stopAutoUpdate(){
+  if(updateInterval){clearInterval(updateInterval);updateInterval=null;}
+}
+
+function saveApiKey(key){
+  TWELVE_DATA_API_KEY=key;
+  localStorage.setItem('td_api_key',key);
+  startAutoUpdate();
+}
+
+// ===== TRADINGVIEW WIDGET =====
+function loadTradingViewTape(containerId){
+  var container=document.getElementById(containerId);
+  if(!container)return;
+  container.innerHTML='';
+  var script=document.createElement('script');
+  script.src='https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
+  script.async=true;
+  script.innerHTML=JSON.stringify({
+    symbols:[
+      {proName:"FOREXCOM:SPXUSD",title:"S&P 500"},
+      {proName:"FOREXCOM:NSXUSD",title:"NASDAQ"},
+      {proName:"NYSE:AAPL",title:"Apple"},
+      {proName:"NASDAQ:MSFT",title:"Microsoft"},
+      {proName:"NASDAQ:NVDA",title:"NVIDIA"},
+      {proName:"NASDAQ:AMD",title:"AMD"},
+      {proName:"NYSE:JPM",title:"JPMorgan"},
+      {proName:"NASDAQ:MU",title:"Micron"},
+      {proName:"NYSE:BRK-B",title:"Berkshire"},
+      {proName:"NASDAQ:AVGO",title:"Broadcom"}
+    ],
+    showSymbolLogo:true,isTransparent:true,displayMode:"adaptive",
+    colorTheme:"dark",locale:"zh_CN"
+  });
+  container.appendChild(script);
+}
+
+function loadTradingViewChart(containerId,symbol){
+  var container=document.getElementById(containerId);
+  if(!container)return;
+  container.innerHTML='';
+  var script=document.createElement('script');
+  script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  script.async=true;
+  script.innerHTML=JSON.stringify({
+    autosize:true,symbol:symbol||"NASDAQ:AAPL",interval:"D",
+    timezone:"America/New_York",theme:"dark",style:"1",
+    locale:"zh_CN",enable_publishing:false,
+    backgroundColor:"rgba(11,15,25,1)",
+    gridColor:"rgba(255,255,255,0.06)",
+    hide_top_toolbar:false,hide_legend:false,
+    withdateranges:true,allow_symbol_change:true
+  });
+  container.appendChild(script);
+}
+
+function badge(type){
+  var labels={BUY:"买入",STRONG_BUY:"强烈买入",SELL:"卖出",STRONG_SELL:"强烈卖出",HOLD:"观望"};
+  var cls={BUY:"badge-buy",STRONG_BUY:"badge-strong-buy",SELL:"badge-sell",STRONG_SELL:"badge-strong-sell",HOLD:"badge-hold"};
+  return '<span class="badge '+(cls[type]||"badge-hold")+'">'+(labels[type]||type)+'</span>';
+}
+function getVIXAdvice(vix){
+  if(vix<15)return{level:"极度平静",action:"考虑减仓",color:"var(--green)"};
+  if(vix<20)return{level:"正常",action:"维持常规策略",color:"var(--accent)"};
+  if(vix<25)return{level:"偏高",action:"开始建仓现金储备",color:"var(--yellow)"};
+  if(vix<30)return{level:"高恐惧",action:"开始买入宽基ETF",color:"var(--orange)"};
+  if(vix<40)return{level:"恐慌",action:"积极买入优质股",color:"var(--red)"};
+  if(vix<50)return{level:"极度恐慌",action:"部署50%以上现金",color:"#9C27B0"};
+  return{level:"历史机会",action:"全力买入",color:"#E91E63"};
+}
+function calcPyramid(budget,basePrice){
+  var ratios=[1,1,1.5,1.5,2,2,3],ratTotal=ratios.reduce(function(a,b){return a+b;},0),step=0.05;
+  var totalShares=0,totalCost=0;
+  var levels=ratios.map(function(r,i){
+    var p=basePrice*(1-step*(i+1));if(p<1)p=1;
+    var amt=(budget*r)/ratTotal,shares=Math.floor(amt/p);
+    totalShares+=shares;totalCost+=shares*p;
+    return{level:i+1,price:p.toFixed(2),ratio:r,shares:shares,amount:Math.round(amt)};
+  });
+  var maxLv=levels.filter(function(l){return l.shares>0;}).length;
+  if(maxLv===0)maxLv=levels.length;
+  return{levels:levels,totalShares:totalShares,avgCost:totalShares>0?(totalCost/totalShares).toFixed(2):"0",total:Math.round(totalCost),maxLevels:maxLv};
+}
+function analyzeStability(ticker){
+  var s=STOCKS[ticker];if(!s)return null;
+  var techScore=0,techDetails=[],fundScore=0,fundDetails=[];
+  var dailyDrop=s.pct;
+  var weekPos=(s.price-s.low52)/(s.high52-s.low52);
+  var isLowPE=s.pe>0&&s.pe<25;
+  var isHighPE=s.pe>35;
+  var isBottomZone=weekPos<0.25;
+
+  // ===== 1. 当日涨跌幅（权重20分）=====
+  var dropScore=0;
+  if(dailyDrop>5){dropScore=10;techDetails.push({label:"当日涨跌",score:"+10",desc:"大涨"+dailyDrop.toFixed(1)+"%，momentum强劲",good:true});}
+  else if(dailyDrop>0){dropScore=5;techDetails.push({label:"当日涨跌",score:"+5",desc:"上涨"+dailyDrop.toFixed(1)+"%，走势正常",good:true});}
+  else if(dailyDrop>-3){dropScore=-5;techDetails.push({label:"当日涨跌",score:"-5",desc:"微跌"+dailyDrop.toFixed(1)+"%，轻微回调",good:null});}
+  else if(dailyDrop>-5){
+    // 中度回调：基本面好则减半扣分
+    if(isLowPE){dropScore=-8;techDetails.push({label:"当日涨跌",score:"-8",desc:"回调"+dailyDrop.toFixed(1)+"%，但PE低基本面稳固，跌幅可控",good:null});}
+    else{dropScore=-15;techDetails.push({label:"当日涨跌",score:"-15",desc:"回调"+dailyDrop.toFixed(1)+"%，短期偏弱",good:false});}
+  }
+  else if(dailyDrop>-8){
+    // 深度回调：基本面好是错杀，基本面差是风险
+    if(isLowPE&&isBottomZone){dropScore=-10;techDetails.push({label:"当日涨跌",score:"-10",desc:"大跌"+dailyDrop.toFixed(1)+"%，但底部区域+低估值，可能是错杀机会",good:null});}
+    else if(isLowPE){dropScore=-15;techDetails.push({label:"当日涨跌",score:"-15",desc:"大跌"+dailyDrop.toFixed(1)+"%，低估值提供安全垫",good:null});}
+    else if(isHighPE){dropScore=-35;techDetails.push({label:"当日涨跌",score:"-35",desc:"大跌"+dailyDrop.toFixed(1)+"%+高估值，风险释放中",good:false});}
+    else{dropScore=-25;techDetails.push({label:"当日涨跌",score:"-25",desc:"大跌"+dailyDrop.toFixed(1)+"%，趋势被破坏",good:false});}
+  }
+  else{
+    // 暴跌>8%：极度谨慎
+    if(isLowPE&&isBottomZone){dropScore=-20;techDetails.push({label:"当日涨跌",score:"-20",desc:"暴跌"+dailyDrop.toFixed(1)+"%，底部区域低估值错杀股，但需等企稳",good:null});}
+    else if(isLowPE){dropScore=-30;techDetails.push({label:"当日涨跌",score:"-30",desc:"暴跌"+dailyDrop.toFixed(1)+"%，低估值但仍需等待企稳信号",good:false});}
+    else{dropScore=-45;techDetails.push({label:"当日涨跌",score:"-45",desc:"暴跌"+dailyDrop.toFixed(1)+"%，恐慌性抛售，绝对不可接飞刀",good:false});}
+  }
+  techScore+=dropScore;
+
+  // ===== 2. 均线排列（30分）=====
+  if(s.ma5>s.ma20&&s.ma20>s.ma60){techScore+=30;techDetails.push({label:"均线排列",score:"+30",desc:"多头排列（5日>20日>60日）",good:true});}
+  else if(s.ma5<s.ma20&&s.ma20<s.ma60){techScore-=30;techDetails.push({label:"均线排列",score:"-30",desc:"空头排列",good:false});}
+  else{techDetails.push({label:"均线排列",score:"0",desc:"震荡排列",good:null});}
+
+  // ===== 3. 60日均线（15分）=====
+  if(s.price>s.ma60){techScore+=15;techDetails.push({label:"60日均线",score:"+15",desc:"价格在60日均线上方",good:true});}
+  else{techScore-=15;techDetails.push({label:"60日均线",score:"-15",desc:"价格跌破60日均线",good:false});}
+
+  // ===== 4. RSI（20分）=====
+  if(s.rsi<30){
+    if(isLowPE&&dailyDrop<-5){techScore+=15;techDetails.push({label:"RSI",score:"+15",desc:"RSI="+s.rsi+" 超卖，低估值错杀股反弹概率高",good:true});}
+    else if(isHighPE&&dailyDrop<-5){techScore+=0;techDetails.push({label:"RSI",score:"0",desc:"RSI="+s.rsi+" 超卖，但高估值可能继续下跌",good:null});}
+    else{techScore+=20;techDetails.push({label:"RSI",score:"+20",desc:"RSI="+s.rsi+" 超卖区域",good:true});}
+  }
+  else if(s.rsi<45){techScore+=8;techDetails.push({label:"RSI",score:"+8",desc:"RSI="+s.rsi+" 偏弱",good:null});}
+  else if(s.rsi<60){techScore+=12;techDetails.push({label:"RSI",score:"+12",desc:"RSI="+s.rsi+" 中性偏强",good:true});}
+  else if(s.rsi<75){techScore+=5;techDetails.push({label:"RSI",score:"+5",desc:"RSI="+s.rsi+" 偏强注意回调",good:null});}
+  else{techScore-=8;techDetails.push({label:"RSI",score:"-8",desc:"RSI="+s.rsi+" 超买区域",good:false});}
+
+  // ===== 5. MACD（15分）=====
+  if(s.macd>s.macdSignal){techScore+=15;techDetails.push({label:"MACD",score:"+15",desc:"金叉运行中",good:true});}
+  else{techScore-=15;techDetails.push({label:"MACD",score:"-15",desc:"死叉运行中",good:false});}
+
+  // ===== 6. 量价关系（10分）=====
+  var volRatio=parseFloat(s.vol)/(parseFloat(s.avgVol)||1);
+  if(isNaN(volRatio))volRatio=1;
+  if(dailyDrop<-5&&volRatio>1.5){techScore-=8;techDetails.push({label:"量价",score:"-8",desc:"放量下跌，恐慌盘涌出",good:false});}
+  else if(dailyDrop>0&&volRatio>1.2){techScore+=8;techDetails.push({label:"量价",score:"+8",desc:"放量上涨，资金流入",good:true});}
+  else if(dailyDrop<0&&volRatio<0.8){techScore-=3;techDetails.push({label:"量价",score:"-3",desc:"缩量下跌，抛压减弱",good:null});}
+  else{techDetails.push({label:"量价",score:"0",desc:"量能正常",good:null});}
+
+  // ===== 基本面评分 =====
+  // PE估值（25分）
+  if(s.pe<15&&s.pe>0){fundScore+=25;fundDetails.push({label:"PE估值",score:"+25",desc:"PE="+s.pe+" 极度低估",good:true});}
+  else if(s.pe<25&&s.pe>0){fundScore+=20;fundDetails.push({label:"PE估值",score:"+20",desc:"PE="+s.pe+" 低估",good:true});}
+  else if(s.pe<36){fundScore+=10;fundDetails.push({label:"PE估值",score:"+10",desc:"PE="+s.pe+" 合理",good:true});}
+  else if(s.pe>0){fundScore-=12;fundDetails.push({label:"PE估值",score:"-12",desc:"PE="+s.pe+" 偏高",good:false});}
+  else{fundDetails.push({label:"PE估值",score:"0",desc:"无PE数据",good:null});}
+
+  // 52周位置（25分）
+  if(weekPos<0.15){fundScore+=25;fundDetails.push({label:"52周位置",score:"+25",desc:"底部"+(weekPos*100).toFixed(0)+"%，极度低估",good:true});}
+  else if(weekPos<0.35){fundScore+=15;fundDetails.push({label:"52周位置",score:"+15",desc:"低位"+(weekPos*100).toFixed(0)+"%",good:true});}
+  else if(weekPos<0.55){fundScore+=8;fundDetails.push({label:"52周位置",score:"+8",desc:"中位"+(weekPos*100).toFixed(0)+"%",good:true});}
+  else if(weekPos<0.75){fundDetails.push({label:"52周位置",score:"0",desc:"中高位"+(weekPos*100).toFixed(0)+"%",good:null});}
+  else{fundScore-=15;fundDetails.push({label:"52周位置",score:"-15",desc:"高位"+(weekPos*100).toFixed(0)+"%，注意回调风险",good:false});}
+
+  // 分析师评级（12分）
+  if(s.analyst==="强烈买入"){fundScore+=12;fundDetails.push({label:"分析师",score:"+12",desc:"强烈买入",good:true});}
+  else if(s.analyst==="买入"){fundScore+=10;fundDetails.push({label:"分析师",score:"+10",desc:"买入",good:true});}
+  else if(s.analyst==="持有"){fundScore+=4;fundDetails.push({label:"分析师",score:"+4",desc:"持有",good:null});}
+  else{fundScore-=8;fundDetails.push({label:"分析师",score:"-8",desc:"卖出",good:false});}
+
+  // ===== 综合判断 =====
+  var totalScore=techScore+fundScore;
+  var status,statusClass,statusText,action,actionClass;
+
+  // 特殊场景判断（优先于纯分数）
+  if(dailyDrop<-8){
+    status="crash";statusClass="status-red";statusText="恐慌下跌";
+    if(isLowPE&&isBottomZone){action="低估值错杀，等企稳后分批关注";actionClass="text-yellow";}
+    else if(isLowPE){action="低估值提供保护，但需等待企稳信号";actionClass="text-orange";}
+    else{action="恐慌性抛售，不建议买入";actionClass="text-red";}
+  }
+  else if(dailyDrop<-5&&isLowPE&&fundScore>=35){
+    status="opportunity";statusClass="status-yellow";statusText="错杀机会";
+    action="基本面好+大跌，可能是错杀，关注企稳后买入";actionClass="text-yellow";
+  }
+  else if(totalScore>=80&&dailyDrop>-3){
+    status="stable";statusClass="status-green";statusText="已企稳";
+    action="技术面+基本面均良好，可买入或持有";actionClass="text-green";
+  }
+  else if(totalScore>=65){
+    status="stable";statusClass="status-green";statusText="趋势良好";
+    action="可买入或持有";actionClass="text-green";
+  }
+  else if(totalScore>=45){
+    status="unstable";statusClass="status-yellow";statusText="震荡整理";
+    action="观望等待";actionClass="text-yellow";
+  }
+  else if(totalScore>=25){
+    status="caution";statusClass="status-orange";statusText="趋势偏弱";
+    action="谨慎操作";actionClass="text-orange";
+  }
+  else{
+    status="downtrend";statusClass="status-red";statusText="下行趋势";
+    action="不建议买入";actionClass="text-red";
+  }
+
+  return{ticker:ticker,name:s.name,price:s.price,change:s.change,pct:s.pct,cap:s.cap,pe:s.pe,vol:s.vol,avgVol:s.avgVol,high52:s.high52,low52:s.low52,ma5:s.ma5,ma20:s.ma20,ma60:s.ma60,rsi:s.rsi,macd:s.macd,macdSignal:s.macdSignal,analyst:s.analyst,techScore:techScore,techDetails:techDetails,fundScore:fundScore,fundDetails:fundDetails,totalScore:totalScore,status:status,statusClass:statusClass,statusText:statusText,action:action,actionClass:actionClass,r1:(s.price*1.04).toFixed(2),r2:(s.price*1.08).toFixed(2),s1:(s.price*0.96).toFixed(2),s2:(s.price*0.92).toFixed(2),buyTargets:[(s.price*0.98).toFixed(2),(s.price*0.95).toFixed(2),(s.price*0.90).toFixed(2)],stopLoss:(s.price*0.88).toFixed(2),weekPos:weekPos};
+}
+function searchStocks(query){
+  if(!query||query.length<1)return[];
+  var q=query.toUpperCase(),results=[];
+  for(var t in STOCK_NAMES){if(t.indexOf(q)>=0||STOCK_NAMES[t].toUpperCase().indexOf(q)>=0){results.push({ticker:t,name:STOCK_NAMES[t]});}}
+  return results.slice(0,20);
+}
+
+var ICON={dashboard:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',market:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',analysis:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',portfolio:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',signals:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',strategy:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',crypto:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F7931A" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9.5c.5-1 1.5-1.5 2.5-1.5s2 .5 2.5 1.5c.5 1 0 2-1.5 2.5"/><path d="M12 14v3"/><circle cx="12" cy="17" r="0.5"/></svg>'};
+
+var currentPage="dashboard";
+var analysisTicker="AAPL";
+var portfolioTab="aggressive";
+var expandedPos=null;
+var signalsFilter="ALL";
+var stratBudget=10000,stratBase=200;
+
+function renderDashboard(){
+  setTimeout(function(){loadTradingViewTape('tv-tape');},0);
+  var idx=Object.entries(INDICES);
+  var stocks=Object.entries(STOCKS).sort(function(a,b){return parseFloat(b[1].cap)-parseFloat(a[1].cap);}).slice(0,10);
+  var recent=SIGNALS.slice(0,5);
+  var html='<div class="section-title">'+ICON.dashboard+' 仪表盘</div>';
+  html+='<div id="tv-tape" class="tv-widget-container" style="margin-bottom:16px"></div>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">';
+  html+='<div class="live-indicator"><span class="live-dot"></span><span>实时数据监控</span></div>';
+  html+='<div style="display:flex;align-items:center;gap:12px">';
+  var hasKey=TWELVE_DATA_API_KEY&&TWELVE_DATA_API_KEY!=='demo';
+  html+='<span id="updateStatus" class="api-status ok">&#9989; iFinD+Yahoo 实时数据已接入</span>';
+  html+='<span id="lastUpdate" class="last-update"></span>';
+  html+='<span id="dsStatus"></span>';
+  html+='<button class="refresh-btn" id="refreshBtn" onclick="updateRealtimeData()">';
+  html+='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+  html+='立即刷新</button></div></div>';
+  html+='<div class="grid-4">'+idx.map(function(e){var k=e[0],v=e[1];return '<div class="index-card"><div class="text-xs text-secondary">'+v.name+'</div><div class="index-value">'+(k==="^VIX"?v.price.toFixed(2):v.price.toLocaleString("en-US",{minimumFractionDigits:2}))+'</div><div class="'+(v.change>=0?"up":"down")+' font-mono text-sm">'+(v.change>=0?"+":"")+v.change.toFixed(2)+' ('+(v.change>=0?"+":"")+v.pct.toFixed(2)+'%)</div></div>';}).join('')+'</div>';
+  html+='<div class="card mt-4"><div class="card-title">'+ICON.dashboard+' VIX恐慌指数与建议</div>'+(function(){var a=getVIXAdvice(INDICES["^VIX"].price);return '<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap"><div><div style="font-size:42px;font-weight:700;font-family:monospace;color:'+a.color+'">'+INDICES["^VIX"].price.toFixed(2)+'</div><div class="'+(INDICES["^VIX"].change>=0?"down":"up")+'">'+(INDICES["^VIX"].change>=0?"+":"")+INDICES["^VIX"].change.toFixed(2)+' ('+INDICES["^VIX"].pct.toFixed(2)+'%)</div></div><div style="flex:1;min-width:200px"><div class="text-sm">当前状态：<span style="color:'+a.color+';font-weight:600">'+a.level+'</span></div><div class="text-sm mt-2">建议操作：<span style="color:'+a.color+';font-weight:600">'+a.action+'</span></div><div class="gauge-bg"><div class="gauge-fill" style="width:'+Math.min(INDICES["^VIX"].price/50*100,100)+'%;background:'+a.color+'"></div></div></div></div>';})()+'</div>';
+  html+='<div class="card mt-4"><div class="card-title">'+ICON.signals+' 最新信号</div>'+recent.map(function(sig){return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span class="font-mono text-sm" style="min-width:90px">'+sig.date+'</span><span class="font-mono font-bold">'+sig.ticker+'</span>'+badge(sig.type)+'<span class="font-mono text-sm">$'+sig.price.toFixed(2)+'</span><span class="text-sm text-secondary" style="flex:1">'+sig.reason+'</span><button class="btn btn-sm" onclick="navAnalysis(&quot;'+sig.ticker+'&quot;)">分析</button></div>';}).join('')+'</div>';
+  html+='<div class="card mt-4"><div class="card-title">'+ICON.market+' 市场监控</div><div class="stock-row stock-header"><span>代码</span><span>名称</span><span style="text-align:right">价格</span><span style="text-align:right">涨跌幅</span><span>信号</span><span>均线</span><span style="text-align:right">成交量</span></div>'+stocks.map(function(e){var t=e[0],s=e[1];var maState=s.ma5>s.ma20&&s.ma20>s.ma60?"多头排列":s.ma5<s.ma20&&s.ma20<s.ma60?"空头排列":"震荡";var maColor=s.ma5>s.ma20&&s.ma20>s.ma60?"var(--green)":s.ma5<s.ma20&&s.ma20<s.ma60?"var(--red)":"var(--yellow)";var sig=s.rsi>65?"HOLD":s.macd>s.macdSignal?"BUY":"HOLD";return'<div class="stock-row"><span class="ticker">'+t+'</span><span class="name">'+s.name+'</span><span class="price">$'+s.price.toFixed(2)+'</span><span class="pct '+(s.pct>=0?"up":"down")+'">'+(s.pct>=0?"+":"")+s.pct.toFixed(2)+'%</span><span>'+badge(sig)+'</span><span class="text-xs" style="color:'+maColor+'">'+maState+'</span><span class="font-mono text-sm" style="text-align:right">'+s.vol+'</span></div>';}).join('')+'</div>';
+  return html;
+}
+
+function renderMarket(){
+  var allStocks=Object.entries(STOCKS).sort(function(a,b){return a[0].localeCompare(b[0]);});
+  var html='<div class="section-title">'+ICON.market+' 市场行情 - '+allStocks.length+'只标的</div>';
+  var upCount=allStocks.filter(function(e){return e[1].change>=0;}).length;
+  var downCount=allStocks.filter(function(e){return e[1].change<0;}).length;
+  html+='<div class="grid-4 mb-4"><div class="index-card"><div class="text-xs text-muted">总标的数</div><div class="index-value">'+allStocks.length+'</div></div><div class="index-card"><div class="text-xs text-muted">上涨</div><div class="index-value" style="color:var(--green)">'+upCount+'</div></div><div class="index-card"><div class="text-xs text-muted">下跌</div><div class="index-value" style="color:var(--red)">'+downCount+'</div></div><div class="index-card"><div class="text-xs text-muted">上涨占比</div><div class="index-value" style="color:var(--accent)">'+Math.round(upCount/allStocks.length*100)+'%</div></div></div>';
+  html+='<div class="card"><div class="market-table"><table><thead><tr><th>代码</th><th>名称</th><th style="text-align:right">价格</th><th style="text-align:right">涨跌</th><th style="text-align:right">涨跌幅</th><th style="text-align:right">52周区间</th><th style="text-align:right">PE</th><th>信号</th><th>操作</th></tr></thead><tbody>';
+  html+=allStocks.map(function(e){var t=e[0],s=e[1];var sig=s.rsi>65?"HOLD":s.macd>s.macdSignal?"BUY":"HOLD";return'<tr><td class="t-td">'+t+'</td><td style="color:var(--text2)">'+s.name+'</td><td style="text-align:right">$'+s.price.toFixed(2)+'</td><td style="text-align:right;color:'+(s.change>=0?"var(--green)":"var(--red)")+'">'+(s.change>=0?"+":"")+s.change.toFixed(2)+'</td><td style="text-align:right;color:'+(s.pct>=0?"var(--green)":"var(--red)")+'">'+(s.pct>=0?"+":"")+s.pct.toFixed(2)+'%</td><td style="text-align:right;color:var(--text2)">$'+s.low52+'-$'+s.high52+'</td><td style="text-align:right">'+(s.pe>0?s.pe:"-")+'</td><td>'+badge(sig)+'</td><td><button class="btn btn-sm" onclick="navAnalysis(&quot;'+t+'&quot;)">分析</button></td></tr>';}).join('');
+  html+='</tbody></table></div></div>';
+  return html;
+}
+
+function renderAnalysis(){
+  var result=analyzeStability(analysisTicker);
+  var html='<div class="section-title">'+ICON.analysis+' 个股分析 - 企稳判断</div>';
+  html+='<div class="card" style="padding:0"><div id="tv-chart" style="height:400px"></div></div>';
+  setTimeout(function(){var sym=STOCKS[analysisTicker]?"NASDAQ:"+analysisTicker:analysisTicker==="BRK-B"?"NYSE:BRK-B":"NASDAQ:"+analysisTicker;loadTradingViewChart('tv-chart',sym);},0);
+  html+='<div class="card"><div class="text-sm text-secondary mb-2">输入股票代码进行分析（覆盖64只完整数据 + 433只名称搜索）：</div><div class="search-wrap"><input class="input" id="tickerInput" value="'+analysisTicker+'" placeholder="输入股票代码，如 AAPL, MU, TSLA..." oninput="onSearchInput(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){var v=document.getElementById(&quot;tickerInput&quot;).value.toUpperCase().trim();if(v){analysisTicker=v;refreshPage();}}"/>';
+  html+='<div class="search-results" id="searchResults"></div></div>';
+  var chips=["AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AMD","MU","AVGO","CRM","BRK-B","JPM","V","LLY"];
+  html+='<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'+chips.map(function(t){var s=STOCKS[t];var label=s?s.name:t;return'<button onclick="analysisTicker=\''+t+'\';refreshPage();" style="padding:4px 12px;border-radius:20px;border:1px solid '+(analysisTicker===t?"var(--accent)":"var(--border)")+';background:'+(analysisTicker===t?"rgba(0,217,192,0.08)":"transparent")+';color:'+(analysisTicker===t?"var(--accent)":"var(--text2)")+';font-size:12px;cursor:pointer">'+t+(label&&label!==t?" &middot; "+label:"")+'</button>';}).join('')+'</div></div>';
+  if(!result){
+    html+='<div class="card"><div class="text-center text-secondary" style="padding:40px 0"><div style="font-size:48px;margin-bottom:16px">&#128269;</div><div class="text-lg font-bold mb-2">未找到 "'+analysisTicker+'" 的数据</div><div class="text-sm text-muted mb-4">该股票不在内置数据库中</div><div class="text-sm text-muted">您可以搜索其他热门股票代码</div></div></div>';
+    return html;
+  }
+  html+='<div class="card" style="border-left:4px solid '+(result.change>=0?"var(--green)":"var(--red)")+'"><div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px"><div><div style="display:flex;align-items:center;gap:12px"><span style="font-size:28px;font-weight:700">'+result.ticker+'</span>'+badge(result.totalScore>=50?(result.totalScore>=80?"STRONG_BUY":"BUY"):"HOLD")+'</div><div class="text-sm text-secondary">'+result.name+'</div></div><div><div style="font-size:32px;font-weight:700;font-family:monospace">$'+(result.price>1000?result.price.toLocaleString("en-US",{minimumFractionDigits:2}):result.price.toFixed(2))+'</div><div class="text-sm font-mono font-bold '+(result.change>=0?"up":"down")+'">'+(result.change>=0?"&#9650; ":"&#9660; ")+(result.change>=0?"+":"")+result.change.toFixed(2)+' ('+(result.pct>=0?"+":"")+result.pct.toFixed(2)+'%)</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;font-size:14px"><div><span class="text-muted" style="font-size:11px">市值</span><div class="font-mono">'+result.cap+'</div></div><div><span class="text-muted" style="font-size:11px">PE</span><div class="font-mono">'+(result.pe>0?result.pe:"-")+'</div></div><div><span class="text-muted" style="font-size:11px">成交量</span><div class="font-mono">'+result.vol+'</div></div><div><span class="text-muted" style="font-size:11px">均量</span><div class="font-mono">'+result.avgVol+'</div></div></div></div></div>';
+  html+='<div class="card" style="border:2px solid '+(result.status==="stable"?"rgba(0,230,118,0.3)":result.status==="unstable"?"rgba(251,191,36,0.3)":result.status==="caution"?"rgba(255,152,0,0.3)":"rgba(255,23,68,0.3)")+'"><div class="card-title">'+ICON.dashboard+' 企稳判断 - <span class="'+result.statusClass+'">'+result.statusText+'</span></div><div style="display:flex;flex-wrap:wrap;gap:24px;align-items:center"><div><div class="score-ring"><div class="score-value" style="color:'+(result.totalScore>=80?"var(--green)":result.totalScore>=50?"var(--yellow)":result.totalScore>=20?"var(--orange)":"var(--red)")+'">'+result.totalScore+'</div><div class="score-label">综合评分</div></div></div><div style="flex:1;min-width:250px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="text-sm">技术面评分 (60%)</span><span class="font-mono font-bold" style="color:'+(result.techScore>=30?"var(--green)":result.techScore>=0?"var(--yellow)":"var(--red)")+'">'+result.techScore+'分</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+Math.max(0,(result.techScore+50)/100*100)+'%;background:'+(result.techScore>=30?"var(--green)":result.techScore>=0?"var(--yellow)":"var(--red)")+'"></div></div><div style="display:flex;justify-content:space-between;margin-bottom:8px;margin-top:12px"><span class="text-sm">基本面评分 (40%)</span><span class="font-mono font-bold" style="color:'+(result.fundScore>=20?"var(--green)":result.fundScore>=0?"var(--yellow)":"var(--red)")+'">'+result.fundScore+'分</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+Math.max(0,(result.fundScore+20)/60*100)+'%;background:'+(result.fundScore>=20?"var(--green)":result.fundScore>=0?"var(--yellow)":"var(--red)")+'"></div></div><div class="mt-4" style="padding:12px;border-radius:8;background:'+(result.status==="stable"?"rgba(0,230,118,0.05)":result.status==="unstable"?"rgba(251,191,36,0.05)":result.status==="caution"?"rgba(255,152,0,0.05)":"rgba(255,23,68,0.05)")+'"><div class="text-sm"><span class="text-muted">操作建议：</span><span class="'+result.statusClass+' font-bold">'+result.action+'</span></div></div></div></div></div>';
+  html+='<div class="card"><div class="card-title">'+ICON.market+' 技术面分析 (60%权重)</div><div class="grid-2">'+result.techDetails.map(function(d){return'<div style="padding:12px;background:var(--elevated);border-radius:8;border-left:3px solid '+(d.good===true?"var(--green)":d.good===false?"var(--red)":"var(--yellow)")+'"><div style="display:flex;justify-content:space-between;align-items:center"><span class="text-sm font-bold">'+d.label+'</span><span class="font-mono font-bold" style="color:'+(d.good===true?"var(--green)":d.good===false?"var(--red)":"var(--yellow)")+'">'+d.score+'</span></div><div class="text-xs text-muted mt-1">'+d.desc+'</div></div>';}).join('')+'</div></div>';
+  html+='<div class="card"><div class="card-title">'+ICON.dashboard+' 基本面分析 (40%权重)</div><div class="grid-2">'+result.fundDetails.map(function(d){return'<div style="padding:12px;background:var(--elevated);border-radius:8;border-left:3px solid '+(d.good===true?"var(--green)":d.good===false?"var(--red)":"var(--yellow)")+'"><div style="display:flex;justify-content:space-between;align-items:center"><span class="text-sm font-bold">'+d.label+'</span><span class="font-mono font-bold" style="color:'+(d.good===true?"var(--green)":d.good===false?"var(--red)":"var(--yellow)")+'">'+d.score+'</span></div><div class="text-xs text-muted mt-1">'+d.desc+'</div></div>';}).join('')+'</div></div>';
+  html+='<div class="card"><div class="card-title">'+ICON.market+' 支撑与阻力位</div><div class="grid-4">'+[{label:"阻力位R2",price:result.r2,color:"var(--red)"},{label:"阻力位R1",price:result.r1,color:"var(--orange)"},{label:"支撑位S1",price:result.s1,color:"var(--green)"},{label:"支撑位S2",price:result.s2,color:"var(--accent)"}].map(function(l){var p=((parseFloat(l.price)-result.price)/result.price*100).toFixed(1);return'<div style="padding:12px;background:var(--elevated);border-radius:8;border-left:3px solid '+l.color+'"><div class="text-xs text-muted">'+l.label+'</div><div class="font-mono font-bold text-lg" style="color:'+l.color+'">$'+l.price+'</div><div class="text-xs font-mono" style="color:'+(parseFloat(p)>=0?"var(--green)":"var(--red)")+'">'+(parseFloat(p)>=0?"+":"")+p+'%</div></div>';}).join('')+'</div></div>';
+  html+='<div class="card"><div class="card-title">'+ICON.signals+' 买卖建议</div><div class="recommend-box" style="border-color:'+(result.totalScore>=50?"var(--green)":"var(--red)")+'"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+badge(result.totalScore>=80?"STRONG_BUY":result.totalScore>=50?"BUY":"HOLD")+'<span class="text-sm text-muted">'+TODAY+'</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><div class="text-xs text-muted mb-2">'+ICON.market+' 目标买入价 (金字塔)</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+result.buyTargets.map(function(p){return'<span class="font-mono text-sm" style="padding:4px 12px;background:rgba(0,230,118,0.1);color:var(--green);border-radius:6px">$'+p+'</span>';}).join('')+'</div></div><div><div class="text-xs text-muted mb-2">'+ICON.signals+' 止损价</div><span class="font-mono font-bold" style="color:var(--red)">$'+result.stopLoss+'</span><span class="text-xs text-muted"> (距现价'+((1-parseFloat(result.stopLoss)/result.price)*100).toFixed(1)+'%)</span></div></div></div></div>';
+  return html;
+}
+
+
+function renderPortfolio(){
+  var positions=POSITIONS[portfolioTab];
+  var accountNames={aggressive:"进取型",stable:"稳健型",defensive:"防守型"};
+  var totalValue=positions.reduce(function(s,p){var sp=STOCKS[p.ticker];var price=sp?sp.price:p.cost;return s+p.shares*price;},0);
+  var totalCost=positions.reduce(function(s,p){return s+p.shares*p.cost;},0);
+  var totalPL=totalValue-totalCost;
+  var html='<div class="section-title">'+ICON.portfolio+' 持仓管理</div>';
+  html+='<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;justify-content:space-between;align-items:center">';
+  html+='<div style="display:flex;gap:12px;flex-wrap:wrap">'+
+    [{key:"aggressive",label:"进取型 (45%)",desc:"高增长潜力"},{key:"stable",label:"稳健型 (40%)",desc:"均衡配置"},{key:"defensive",label:"防守型 (15%)",desc:"低风险收息"}].map(function(a){
+      return'<button onclick="portfolioTab=\''+a.key+'\';refreshPage();" style="padding:8px 16px;border-radius:8px;border:1px solid '+(portfolioTab===a.key?"var(--accent)":"var(--border)")+';background:'+(portfolioTab===a.key?"rgba(0,217,192,0.1)":"var(--elevated)")+';color:'+(portfolioTab===a.key?"var(--accent)":"var(--text2)")+';font-size:14px;cursor:pointer;font-weight:'+(portfolioTab===a.key?"600":"400")+'">'+a.label+'<div class="text-xs" style="color:var(--text2);font-weight:400">'+a.desc+'</div></button>';
+    }).join('')+'</div>';
+  html+='<div style="display:flex;gap:8px"><button class="btn btn-sm" onclick="openAddModal()">+ 添加持仓</button><button class="btn btn-sm btn-secondary" onclick="resetPortfolio()">重置默认</button></div></div>';
+  html+='<div class="grid-4 mb-4"><div class="index-card"><div class="text-xs text-muted">账户总值</div><div class="index-value">$'+totalValue.toLocaleString("en-US",{minimumFractionDigits:0})+'</div></div><div class="index-card"><div class="text-xs text-muted">持仓成本</div><div class="index-value" style="color:var(--text2)">$'+totalCost.toLocaleString("en-US",{minimumFractionDigits:0})+'</div></div><div class="index-card"><div class="text-xs text-muted">总盈亏</div><div class="index-value" style="color:'+(totalPL>=0?"var(--green)":"var(--red)")+'">'+(totalPL>=0?"+":"")+'$'+totalPL.toLocaleString("en-US",{minimumFractionDigits:0})+'</div></div><div class="index-card"><div class="text-xs text-muted">收益率</div><div class="index-value" style="color:'+(totalPL>=0?"var(--green)":"var(--red)")+'">'+(totalPL>=0?"+":"")+(totalCost>0?(totalPL/totalCost*100).toFixed(1):"0.0")+'%</div></div></div>';
+  html+='<div class="card"><div class="card-title">'+ICON.portfolio+' '+accountNames[portfolioTab]+' - 持仓明细 ('+positions.length+'只)</div>';
+  if(positions.length===0){
+    html+='<div class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="text-muted">暂无持仓</div><button class="btn mt-3" onclick="openAddModal()">添加第一只持仓</button></div>';
+  }else{
+    html+=positions.map(function(pos){
+      var s=STOCKS[pos.ticker];
+      var name=s?s.name:pos.ticker;
+      var currentPrice=s?s.price:pos.cost;
+      var value=pos.shares*currentPrice;
+      var cost=pos.shares*pos.cost;
+      var pl=value-cost;
+      var plPct=cost>0?(pl/cost*100):0;
+      var isExpanded=expandedPos===pos.ticker;
+      var cardHtml='<div class="pos-card" style="border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden">';
+      cardHtml+='<div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto auto;gap:12px;align-items:center;background:var(--surface)">';
+      cardHtml+='<div onclick="expandedPos=\''+pos.ticker+'\';refreshPage();" style="cursor:pointer"><div class="font-mono font-bold">'+pos.ticker+'</div><div class="text-xs text-muted">'+name+'</div></div>';
+      cardHtml+='<div onclick="expandedPos=\''+pos.ticker+'\';refreshPage();" style="text-align:center;cursor:pointer"><div class="font-mono">'+pos.shares+'股</div><div class="text-xs text-muted">成本 $'+pos.cost.toFixed(2)+'</div></div>';
+      cardHtml+='<div onclick="expandedPos=\''+pos.ticker+'\';refreshPage();" style="text-align:center;cursor:pointer"><div class="font-mono font-bold">$'+value.toLocaleString("en-US",{minimumFractionDigits:0})+'</div><div class="text-xs text-muted">现价 $'+currentPrice.toFixed(2)+'</div></div>';
+      cardHtml+='<div onclick="expandedPos=\''+pos.ticker+'\';refreshPage();" style="text-align:right;cursor:pointer"><div class="font-mono font-bold" style="color:'+(pl>=0?"var(--green)":"var(--red)")+'">'+(pl>=0?"+":"")+'$'+pl.toLocaleString("en-US",{minimumFractionDigits:0})+'</div><div class="text-xs font-mono" style="color:'+(pl>=0?"var(--green)":"var(--red)")+'">'+(pl>=0?"+":"")+plPct.toFixed(1)+'%</div></div>';
+      cardHtml+='<span onclick="expandedPos=\''+pos.ticker+'\';refreshPage();" style="font-size:18px;color:var(--text2);transform:'+(isExpanded?"rotate(180deg)":"rotate(0deg)")+';display:inline-block;transition:transform 0.2s;cursor:pointer">&#9662;</span>';
+      cardHtml+='<div class="pos-actions"><button class="pos-action-btn edit" onclick="event.stopPropagation();openEditModal(\''+pos.ticker+'\');" title="编辑">&#9998;</button><button class="pos-action-btn" onclick="event.stopPropagation();removePosition(\''+pos.ticker+'\');" title="删除">&#10005;</button></div>';
+      cardHtml+='</div>';
+      if(isExpanded){
+        cardHtml+='<div style="padding:16px;border-top:1px solid var(--border);background:rgba(0,0,0,0.2)">';
+        cardHtml+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">';
+        cardHtml+='<div><div class="text-sm font-bold mb-2" style="color:var(--green)">&#9650; 买入档位</div>';
+        cardHtml+='<div style="display:flex;flex-direction:column;gap:8px">';
+        pos.buyLevels.forEach(function(bt,idx){
+          var levels=["首次建仓","加仓","重仓"];
+          cardHtml+='<div style="padding:10px;background:rgba(0,230,118,0.06);border-radius:8;border-left:3px solid var(--green);display:flex;justify-content:space-between;align-items:center"><div><div class="text-xs text-muted">'+levels[idx]+'</div><div class="font-mono font-bold">$'+bt.price.toFixed(2)+'</div><div class="text-xs text-muted">'+bt.reason+'</div></div><div style="text-align:right"><div class="text-xs text-muted">跌幅</div><div class="font-mono">'+bt.pct+'</div></div></div>';
+        });
+        cardHtml+='</div></div>';
+        cardHtml+='<div><div class="text-sm font-bold mb-2" style="color:var(--red)">&#9660; 卖出档位</div>';
+        cardHtml+='<div style="display:flex;flex-direction:column;gap:8px">';
+        pos.sellLevels.forEach(function(st,idx){
+          var levels=["减仓","止盈","清仓"];
+          cardHtml+='<div style="padding:10px;background:rgba(255,23,68,0.06);border-radius:8;border-left:3px solid var(--red);display:flex;justify-content:space-between;align-items:center"><div><div class="text-xs text-muted">'+levels[idx]+'</div><div class="font-mono font-bold">$'+st.price.toFixed(2)+'</div><div class="text-xs text-muted">'+st.reason+'</div></div><div style="text-align:right"><div class="text-xs text-muted">涨幅</div><div class="font-mono">'+st.pct+'</div></div></div>';
+        });
+        cardHtml+='</div><div style="margin-top:12px;padding:10px;background:rgba(255,23,68,0.08);border-radius:8;border-left:3px solid var(--red);display:flex;justify-content:space-between;align-items:center"><div><div class="text-xs text-muted">止损价</div><div class="font-mono font-bold" style="color:var(--red)">$'+pos.stopLoss.toFixed(2)+'</div></div><div class="text-xs text-muted">'+pos.stopReason+'</div></div>';
+        cardHtml+='</div></div>';
+        if(pos.strategy){
+          cardHtml+='<div style="margin-top:12px;padding:12px;background:var(--elevated);border-radius:8"><div class="text-xs text-muted mb-1">&#128161; 投资策略</div><div class="text-sm">'+pos.strategy+'</div></div>';
+        }
+        cardHtml+='</div>';
+      }
+      cardHtml+='</div>';
+      return cardHtml;
+    }).join('');
+    html+='<button class="add-pos-btn" onclick="openAddModal()"><span style="font-size:20px">+</span> 添加持仓</button>';
+  }
+  html+='</div>';
+  if(showAddModal){
+    html+='<div class="modal-overlay" onclick="if(event.target===this)closeModal();"><div class="modal-content" onclick="event.stopPropagation();"><div class="modal-title">&#128203; 添加持仓</div>';
+    html+='<div class="form-group"><label class="form-label">股票代码</label><input type="text" id="addTicker" class="form-input" placeholder="如 AAPL, NVDA, MU" onkeydown="if(event.key===\'Enter\')document.getElementById(\'addShares\').focus()"/></div>';
+    html+='<div class="form-row"><div class="form-group"><label class="form-label">持股数量</label><input type="number" id="addShares" class="form-input" placeholder="100" onkeydown="if(event.key===\'Enter\')document.getElementById(\'addCost\').focus()"/></div><div class="form-group"><label class="form-label">成本价 ($)</label><input type="number" id="addCost" class="form-input" placeholder="150.00" step="0.01" onkeydown="if(event.key===\'Enter\')document.getElementById(\'addStrategy\').focus()"/></div></div>';
+    html+='<div class="form-group"><label class="form-label">投资策略 (可选)</label><input type="text" id="addStrategy" class="form-input" placeholder="如：AI芯片龙头，长期持有" onkeydown="if(event.key===\'Enter\')document.getElementById(\'addStopLoss\').focus()"/></div>';
+    html+='<div class="form-group"><label class="form-label">止损价 (可选，默认-15%)</label><input type="number" id="addStopLoss" class="form-input" placeholder="自动计算" step="0.01"/></div>';
+    html+='<div class="modal-btns"><button class="btn-secondary" onclick="closeModal()">取消</button><button class="btn" onclick="addPosition(document.getElementById(\'addTicker\').value,document.getElementById(\'addShares\').value,document.getElementById(\'addCost\').value,document.getElementById(\'addStrategy\').value,document.getElementById(\'addStopLoss\').value)">确认添加</button></div>';
+    html+='</div></div>';
+  }
+  if(showEditModal){
+    html+='<div class="modal-overlay" onclick="if(event.target===this)closeModal();"><div class="modal-content" onclick="event.stopPropagation();"><div class="modal-title">&#9998; 编辑持仓 - '+editTicker+'</div>';
+    html+='<div class="form-row"><div class="form-group"><label class="form-label">持股数量</label><input type="number" id="editShares" class="form-input" value="'+editShares+'" onchange="editShares=this.value"/></div><div class="form-group"><label class="form-label">成本价 ($)</label><input type="number" id="editCost" class="form-input" value="'+editCost+'" step="0.01" onchange="editCost=this.value"/></div></div>';
+    html+='<div class="form-group"><label class="form-label">投资策略</label><input type="text" id="editStrategy" class="form-input" value="'+editStrategy+'" onchange="editStrategy=this.value"/></div>';
+    html+='<div class="form-group"><label class="form-label">止损价</label><input type="number" id="editStopLoss" class="form-input" value="'+editStopLoss+'" step="0.01" onchange="editStopLoss=this.value"/></div>';
+    html+='<div class="modal-btns"><button class="btn-secondary" onclick="closeModal()">取消</button><button class="btn" onclick="saveEditPosition()">保存修改</button></div>';
+    html+='</div></div>';
+  }
+  return html;
+}
+
+function renderSignals(){
+  var all=SIGNALS;
+  var filtered=signalsFilter==="ALL"?all:all.filter(function(s){return s.type===signalsFilter;});
+  var html='<div class="section-title">'+ICON.signals+' 买卖信号</div>';
+  html+='<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
+  var filters=[{k:"ALL",l:"全部"},{k:"BUY",l:"买入"},{k:"STRONG_BUY",l:"强烈买入"},{k:"HOLD",l:"持有"},{k:"SELL",l:"卖出"}];
+  html+=filters.map(function(f){return'<button onclick="signalsFilter=\''+f.k+'\';refreshPage();" style="padding:6px 14px;border-radius:20px;border:1px solid '+(signalsFilter===f.k?"var(--accent)":"var(--border)")+';background:'+(signalsFilter===f.k?"rgba(0,217,192,0.1)":"var(--elevated)")+';color:'+(signalsFilter===f.k?"var(--accent)":"var(--text2)")+';font-size:13px;cursor:pointer">'+f.l+'</button>';}).join('');
+  html+='</div>';
+  html+='<div class="grid-4 mb-4"><div class="index-card"><div class="text-xs text-muted">总信号</div><div class="index-value">'+all.length+'</div></div><div class="index-card"><div class="text-xs text-muted">买入</div><div class="index-value" style="color:var(--green)">'+all.filter(function(s){return s.type==="BUY"||s.type==="STRONG_BUY";}).length+'</div></div><div class="index-card"><div class="text-xs text-muted">持有</div><div class="index-value" style="color:var(--yellow)">'+all.filter(function(s){return s.type==="HOLD";}).length+'</div></div><div class="index-card"><div class="text-xs text-muted">卖出</div><div class="index-value" style="color:var(--red)">'+all.filter(function(s){return s.type==="SELL";}).length+'</div></div></div>';
+  html+='<div class="card">';
+  if(filtered.length===0){
+    html+='<div class="text-center text-muted" style="padding:40px">暂无信号</div>';
+  }else{
+    html+='<div style="display:flex;flex-direction:column;gap:1px">';
+    html+=filtered.map(function(sig){
+      var s=STOCKS[sig.ticker];
+      var name=s?s.name:sig.ticker;
+      return'<div style="padding:14px;display:grid;grid-template-columns:80px 80px 100px 80px 1fr auto;gap:12px;align-items:center;border-bottom:1px solid var(--border);background:var(--surface)"><span class="font-mono text-sm" style="color:var(--text2)">'+sig.date+'</span><span class="font-mono font-bold">'+sig.ticker+'</span>'+badge(sig.type)+'<span class="font-mono text-sm">$'+sig.price.toFixed(2)+'</span><span class="text-sm text-secondary">'+sig.reason+'</span><button class="btn btn-sm" onclick="navAnalysis(\''+sig.ticker+'\')">分析</button></div>';
+    }).join('');
+    html+='</div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function renderStrategy(){
+  var vix=INDICES["^VIX"].price;
+  var vixAdvice=getVIXAdvice(vix);
+  var pyr=calcPyramid(stratBudget,stratBase); // budget=总投入, basePrice=基础仓位价
+  var html='<div class="section-title">'+ICON.strategy+' 投资策略</div>';
+  html+='<div class="card" style="border:2px solid rgba(0,217,192,0.2)"><div class="card-title">'+ICON.strategy+' 金字塔买入法则</div>';
+  html+='<div class="text-sm text-secondary mb-4">分批建仓，越跌越买。以基础仓位为锚点，每档增加50%仓位</div>';
+  html+='<div style="display:flex;align-items:center;gap:24px;margin-bottom:20px;flex-wrap:wrap">';
+  html+='<div style="flex:1;min-width:200px"><label class="text-sm text-muted">总投资金额 ($)</label><input type="number" id="budgetInput" class="input" value="'+stratBudget+'" onchange="stratBudget=parseInt(this.value)||10000;refreshPage();"/></div>';
+  html+='<div style="flex:1;min-width:200px"><label class="text-sm text-muted">基础仓位 ($)</label><input type="number" id="baseInput" class="input" value="'+stratBase+'" onchange="stratBase=parseInt(this.value)||200;refreshPage();"/></div>';
+  html+='</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">';
+  pyr.levels.forEach(function(lv,idx){
+    var isActive=idx<=pyr.maxLevels;
+    html+='<div style="padding:14px;border-radius:12px;border:2px solid '+(isActive?"var(--accent)":"var(--border)")+';background:'+(isActive?"rgba(0,217,192,0.05)":"var(--elevated)")+';opacity:'+(isActive?"1":"0.4")+'">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+    html+='<div style="display:flex;align-items:center;gap:12px"><span style="font-size:24px;font-weight:700;color:var(--accent)">T'+(idx+1)+'</span><span class="text-sm">'+(idx===0?"首次建仓":idx===1?"二次加仓":idx===2?"三次加仓":idx===3?"四次加仓":"五次加仓")+'</span></div>';
+    html+='<div style="text-align:right"><div class="font-mono font-bold" style="font-size:20px">$'+lv.amount.toLocaleString("en-US")+'</div><div class="text-xs text-muted">买入金额</div></div>';
+    html+='</div></div>';
+  });
+  html+='</div>';
+  html+='<div style="padding:16px;background:var(--elevated);border-radius:12px"><div class="text-sm"><span class="text-muted">总投入：</span><span class="font-mono font-bold" style="color:var(--accent)">$'+pyr.total.toLocaleString("en-US")+'</span><span class="text-muted" style="margin-left:24px">最大档数：</span><span class="font-mono font-bold" style="color:var(--accent)">'+pyr.maxLevels+'档</span></div></div>';
+  html+='</div>';
+  html+='<div class="card" style="border:2px solid '+(vixAdvice.color==="var(--green)"?"rgba(0,230,118,0.3)":vixAdvice.color==="var(--yellow)"?"rgba(251,191,36,0.3)":vixAdvice.color==="var(--orange)"?"rgba(255,152,0,0.3)":"rgba(255,23,68,0.3)")+'"><div class="card-title">'+ICON.signals+' VIX恐慌指数决策系统</div>';
+  html+='<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:20px"><div><div style="font-size:48px;font-weight:700;font-family:monospace;color:'+vixAdvice.color+'">'+vix.toFixed(2)+'</div><div class="text-sm" style="color:'+vixAdvice.color+'">'+vixAdvice.level+'</div></div><div style="flex:1;min-width:200px"><div class="gauge-bg"><div class="gauge-fill" style="width:'+Math.min(vix/50*100,100)+'%;background:'+vixAdvice.color+'"></div></div><div class="text-sm mt-2">建议操作：<span style="color:'+vixAdvice.color+';font-weight:600">'+vixAdvice.action+'</span></div></div></div>';
+  html+='<div class="grid-2">';
+  var vixLevels=[{r:[0,15],c:"var(--green)",l:"低波动 (0-15)",a:"积极建仓"},{r:[15,20],c:"var(--yellow)",l:"正常 (15-20)",a:"正常操作"},{r:[20,25],c:"var(--orange)",l:"警戒 (20-25)",a:"谨慎操作"},{r:[25,35],c:"var(--red)",l:"恐慌 (25-35)",a:"观望为主"},{r:[35,100],c:"var(--red)",l:"极度恐慌 (35+)",a:"等待企稳"}];
+  vixLevels.forEach(function(vl){
+    var isCurrent=vix>=vl.r[0]&&vix<vl.r[1];
+    html+='<div style="padding:14px;border-radius:10px;border:2px solid '+(isCurrent?vl.c:"var(--border)")+';background:'+(isCurrent?vl.c.replace(")",",0.08)"):"var(--elevated)")+'"><div style="display:flex;justify-content:space-between;align-items:center"><span class="text-sm font-bold" style="color:'+(isCurrent?vl.c:"var(--text2)")+'">'+vl.l+'</span>'+(isCurrent?'<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:'+vl.c+';color:#fff">当前</span>':'')+'</div><div class="text-xs text-muted mt-1">'+vl.a+'</div></div>';
+  });
+  html+='</div></div>';
+  html+='<div class="card"><div class="card-title">'+ICON.dashboard+' 三账户策略规则</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:16px">';
+  var rules=[
+    {title:"进取型 (45%)",color:"var(--accent)",items:["集中持有3-5只高增长股票","追求年化20%+收益","止损线: -10%","适合年轻投资者或风险承受能力强"]},
+    {title:"稳健型 (40%)",color:"var(--yellow)",items:["均衡配置8-12只蓝筹股","追求年化12-15%收益","止损线: -8%","适合大多数投资者"]},
+    {title:"防守型 (15%)",color:"var(--green)",items:["持有高分红收息股+债券","追求年化6-8%收益+稳定分红","止损线: -5%","适合保守投资者或退休资金"]}
+  ];
+  rules.forEach(function(r){
+    html+='<div style="padding:16px;border-radius:12px;border-left:4px solid '+r.color+';background:var(--elevated)"><div class="text-sm font-bold mb-2" style="color:'+r.color+'">'+r.title+'</div>'+r.items.map(function(it){return'<div class="text-sm text-secondary" style="padding:4px 0">&#8226; '+it+'</div>';}).join('')+'</div>';
+  });
+  html+='</div></div>';
+  return html;
+}
+
+function renderSettings(){
+  var hasKey=TWELVE_DATA_API_KEY&&TWELVE_DATA_API_KEY!=='demo';
+  var keyDisplay=hasKey?TWELVE_DATA_API_KEY.substring(0,8)+'****':'';
+  var html='<div class="section-title">&#9881; 系统设置</div>';
+
+  // API Key Configuration
+  html+='<div class="card"><div class="card-title">&#128273; Twelve Data API Key 配置</div>';
+  html+='<div class="text-sm text-secondary mb-4">配置 API Key 后，系统将自动每分钟更新全部64只股票的实时价格数据。</div>';
+
+  // Status
+  html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">';
+  html+='<div class="api-status '+(hasKey?'ok':'warn')+'">'+(hasKey?'&#9989; 已配置':'&#9888; 未配置')+'</div>';
+  if(hasKey){
+    html+='<span class="text-sm text-muted">当前Key: '+keyDisplay+'</span>';
+  }
+  html+='</div>';
+
+  // Quota info
+  html+='<div class="settings-card">';
+  html+='<div class="text-sm font-bold mb-2">&#128161; Twelve Data 免费版额度</div>';
+  html+='<div class="grid-2"><div class="index-card"><div class="text-xs text-muted">每日请求上限</div><div class="index-value" style="font-size:20px">800 次</div></div><div class="index-card"><div class="text-xs text-muted">每分钟请求上限</div><div class="index-value" style="font-size:20px">8 次</div></div></div>';
+  html+='<div class="text-sm text-muted mt-2">&#8226; 64只股票约需 64/8 = 8分钟完成一轮全量更新<br>&#8226; 建议仅开启您关注的核心标的实时更新以节省额度<br>&#8226; 注册地址: <a href="https://twelvedata.com" target="_blank" style="color:var(--accent)">twelvedata.com</a></div>';
+  html+='</div>';
+
+  // Input form
+  if(!hasKey){
+    html+='<div class="form-group"><label class="form-label">输入 API Key</label>';
+    html+='<input type="text" id="apiKeyInput" class="form-input" placeholder="粘贴您的 Twelve Data API Key"/>';
+    html+='<div class="text-xs text-muted mt-1">Key 仅保存在您的浏览器本地，不会上传到任何服务器</div></div>';
+    html+='<div style="display:flex;gap:10px">';
+    html+='<button class="btn btn-sm" onclick="saveApiKey(document.getElementById(\'apiKeyInput\').value)">保存并启用</button>';
+    html+='<button class="btn-secondary btn-sm" onclick="testApiKey(document.getElementById(\'apiKeyInput\').value)">测试连接</button>';
+    html+='</div>';
+  }else{
+    html+='<div style="display:flex;gap:10px">';
+    html+='<button class="btn btn-sm" onclick="clearApiKey()">清除 API Key</button>';
+    html+='<button class="btn-secondary btn-sm" onclick="testApiKey(TWELVE_DATA_API_KEY)">测试连接</button>';
+    html+='</div>';
+  }
+  html+='</div>';
+
+  // Portfolio Management
+  html+='<div class="card"><div class="card-title">&#128203; 持仓数据管理</div>';
+  html+='<div class="text-sm text-secondary mb-4">持仓数据保存在浏览器本地。您可以重置为系统默认持仓。</div>';
+  html+='<div style="display:flex;gap:10px">';
+  html+='<button class="btn btn-sm" onclick="if(confirm(\'确定重置所有持仓为默认值？\')){POSITIONS=JSON.parse(JSON.stringify(DEFAULT_POSITIONS));savePortfolio();refreshPage();}">重置默认持仓</button>';
+  html+='</div>';
+  html+='</div>';
+
+  // About
+  html+='<div class="card"><div class="card-title">&#8505; 关于系统</div>';
+  html+='<div class="text-sm text-secondary">';
+  html+='<p>&#8226; 美股量化投资系统 - 基于多维度技术分析和基本面数据的投资决策辅助工具</p>';
+  html+='<p>&#8226; 覆盖64只热门美股完整数据 + 320只名称搜索</p>';
+  html+='<p>&#8226; 实时数据：TradingView Widget + Twelve Data API (可选)</p>';
+  html+='<p>&#8226; 本系统仅供参考，不构成投资建议。投资有风险，入市需谨慎。</p>';
+  html+='</div></div>';
+
+  return html;
+}
+
+function saveApiKey(key){
+  if(!key||!key.trim()){alert('请输入有效的 API Key');return;}
+  key=key.trim();
+  TWELVE_DATA_API_KEY=key;
+  try{localStorage.setItem('td_api_key',key);}catch(e){}
+  alert('API Key 已保存，实时数据更新已启用！');
+  refreshPage();
+  startAutoUpdate();
+}
+function clearApiKey(){
+  if(!confirm('确定清除 API Key？实时价格更新将停止。'))return;
+  TWELVE_DATA_API_KEY='';
+  try{localStorage.removeItem('td_api_key');}catch(e){}
+  stopAutoUpdate();
+  refreshPage();
+}
+async function testApiKey(key){
+  if(!key||!key.trim()){alert('请输入 API Key 后再测试');return;}
+  try{
+    var resp=await fetch('https://api.twelvedata.com/quote?symbol=AAPL&apikey='+key.trim());
+    var data=await resp.json();
+    if(data.code){alert('测试失败: '+data.message);return;}
+    if(data.price||data.close){
+      alert('连接成功！AAPL 当前价格: $'+(data.price||data.close));
+    }else{
+      alert('连接异常，请检查 API Key');
+    }
+  }catch(e){
+    alert('连接失败: '+e.message);
+  }
+}
+
+function setPage(page){
+  currentPage=page;
+  refreshPage();
+}
+function refreshPage(){
+  var container=document.getElementById("app");
+  if(!container)return;
+  var html='';
+  if(currentPage==="dashboard")html=renderDashboard();
+  else if(currentPage==="market")html=renderMarket();
+  else if(currentPage==="analysis")html=renderAnalysis();
+  else if(currentPage==="portfolio")html=renderPortfolio();
+  else if(currentPage==="signals")html=renderSignals();
+  else if(currentPage==="strategy")html=renderStrategy();
+  else if(currentPage==="settings")html=renderSettings();
+  container.innerHTML=html;
+  updateNav();
+}
+function updateNav(){
+  var links=["dashboard","market","analysis","portfolio","signals","strategy","settings"];
+  links.forEach(function(l){
+    var el=document.getElementById("nav-"+l);
+    if(el)el.className="nav-link"+(currentPage===l?" active":"");
+  });
+}
+function navAnalysis(ticker){
+  analysisTicker=ticker||"AAPL";
+  setPage("analysis");
+}
+function onSearchInput(val){
+  var resultsDiv=document.getElementById("searchResults");
+  if(!resultsDiv)return;
+  if(!val||val.length<1){resultsDiv.style.display="none";resultsDiv.innerHTML="";return;}
+  var results=searchStocks(val);
+  if(results.length===0){resultsDiv.style.display="none";return;}
+  resultsDiv.innerHTML=results.map(function(r){
+    return'<div onclick="selectTicker(\''+r.ticker+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><span class="font-mono font-bold">'+r.ticker+'</span><span class="text-sm text-secondary">'+r.name+'</span></div>';
+  }).join('');
+  resultsDiv.style.display="block";
+}
+function selectTicker(ticker){
+  analysisTicker=ticker;
+  var inp=document.getElementById("tickerInput");
+  if(inp)inp.value=ticker;
+  var res=document.getElementById("searchResults");
+  if(res)res.style.display="none";
+  refreshPage();
+}
+function init(){
+  var hash=window.location.hash.replace('#','');
+  if(hash&&['dashboard','market','analysis','portfolio','signals','strategy','settings'].indexOf(hash)>=0){
+    currentPage=hash;
+  }
+  // Persist default key to localStorage
+  try{if(!localStorage.getItem('td_api_key')&&TWELVE_DATA_API_KEY){localStorage.setItem('td_api_key',TWELVE_DATA_API_KEY);}}catch(e){}
+  refreshPage();
+  // Show initial status
+  var key=TWELVE_DATA_API_KEY||'';
+  if(key&&key!=='demo'){
+    showUpdateStatus('已配置 API Key，准备更新...', 'ok');
+  }else{
+    showUpdateStatus('请配置 API Key 以获取实时数据', 'warn');
+  }
+  showLastUpdate();
+  setTimeout(startAutoUpdate,100);
+  window.addEventListener('hashchange',function(){
+    var h=window.location.hash.replace('#','');
+    if(h&&['dashboard','market','analysis','portfolio','signals','strategy','settings'].indexOf(h)>=0){
+      currentPage=h;
+      refreshPage();
+    }
+  });
+  document.addEventListener("click",function(e){
+    var res=document.getElementById("searchResults");
+    var wrap=document.querySelector(".search-wrap");
+    if(res&&wrap&&!wrap.contains(e.target))res.style.display="none";
+  });
+}
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",init);
+}else{
+  init();
+}
+
+
+var currentPage = 'strategy';
+var portfolioTab = 'aggressive';
+var analysisTicker = 'AAPL';
+var expandedPos = null;
+var signalsFilter = 'ALL';
+var stratBudget = 10000;
+var stratBase = 200;
+var showAddModal = false;
+var showEditModal = false;
+var editTicker = '';
+var editShares = '';
+var editCost = '';
+var editStrategy = '';
+var editStopLoss = '';
+var lastUpdateTime = null;
+var updateInterval = null;
+var isUpdating = false;
+var lastDataSource = '内置缓存';
+var sourceHealth = {ifind:'未知',yahoo:'未知',sp:'未知',twelve:'未知'};
+var TWELVE_DATA_API_KEY = '';
+var TODAY = '2026-07-08';
+var YESTERDAY = '2026-07-07';
+
+try {
+  var result = renderStrategy();
+  console.log('SUCCESS: renderStrategy returned', result.length, 'chars');
+  console.log('Has 投资策略:', result.indexOf('投资策略') >= 0);
+  console.log('Has 金字塔:', result.indexOf('金字塔') >= 0);
+  console.log('Has VIX:', result.indexOf('VIX') >= 0);
+  console.log('Has 买卖信号:', result.indexOf('买卖信号') >= 0);
+  console.log('First 100 chars:', result.substring(0, 100));
+} catch(e) {
+  console.log('ERROR:', e.message);
+  console.log('Stack:', e.stack);
+}

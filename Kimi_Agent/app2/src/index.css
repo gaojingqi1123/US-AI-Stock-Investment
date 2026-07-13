@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 228 56% 3%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 7%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 7%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 172 100% 43%;
+    --primary-foreground: 228 56% 3%;
+    --secondary: 217 19% 12%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 19% 12%;
+    --muted-foreground: 215 16% 57%;
+    --accent: 172 100% 43%;
+    --accent-foreground: 228 56% 3%;
+    --destructive: 350 100% 54%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 19% 15%;
+    --input: 217 19% 15%;
+    --ring: 172 100% 43%;
+    --radius: 0.625rem;
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 172 100% 43%;
+    --sidebar-primary-foreground: 228 56% 3%;
+    --sidebar-accent: 217 19% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 19% 15%;
+    --sidebar-ring: 172 100% 43%;
+
+    /* Financial terminal tokens */
+    --bg-primary: #030712;
+    --bg-card: #0B0F19;
+    --bg-elevated: #111827;
+    --bg-panel: #0D1320;
+    --accent-primary: #00D9C0;
+    --accent-primary-dim: rgba(0, 217, 192, 0.15);
+    --accent-glow: rgba(0, 217, 192, 0.4);
+    --signal-bullish: #00E676;
+    --signal-bullish-dim: rgba(0, 230, 118, 0.15);
+    --signal-bearish: #FF1744;
+    --signal-bearish-dim: rgba(255, 23, 68, 0.15);
+    --signal-neutral: #FBBF24;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --text-dim: #475569;
+    --chart-bullish: #00E676;
+    --chart-bearish: #FF1744;
+    --chart-ma5: #00D9C0;
+    --chart-ma20: #F472B6;
+    --chart-ma60: #FBBF24;
+    --chart-grid: #1E293B;
+    --chart-crosshair: rgba(255, 255, 255, 0.2);
+    --chart-volume: rgba(0, 217, 192, 0.3);
+    --border-default: #1E293B;
+    --border-hover: #334155;
+    --border-accent: rgba(0, 217, 192, 0.4);
+    --account-aggressive: #FF6B35;
+    --account-stable: #00D9C0;
+    --account-defensive: #6366F1;
+    --vix-calm: #00E676;
+    --vix-elevated: #FBBF24;
+    --vix-high: #FF9800;
+    --vix-extreme: #FF5722;
+    --vix-panic: #FF1744;
+  }
+
+  * {
+    border-color: var(--border-default);
+  }
+
+  body {
+    background-color: #030712;
+    color: #F8FAFC;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Geist', 'Inter', system-ui, sans-serif;
+  }
+}
